@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+  <!--<filter>-->
+  <!--<description>X509Filter</description>-->
+  <!--<display-name>X509Filter</display-name>-->
+  <!--<filter-name>X509Filter</filter-name>-->
+  <!--<filter-class>morbrian.j2eesandbox.requestdump.filter.X509Filter</filter-class>-->
+  <!--</filter>-->
+  <!--<filter-mapping>-->
+  <!--<filter-name>X509Filter</filter-name>-->
+  <!--<url-pattern>/*</url-pattern>-->
+  <!--<dispatcher>REQUEST</dispatcher>-->
+  <!--<dispatcher>INCLUDE</dispatcher>-->
+  <!--<dispatcher>FORWARD</dispatcher>-->
+  <!--<dispatcher>ERROR</dispatcher>-->
+  <!--</filter-mapping>-->
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SimpleRequestInspectorServlet</web-resource-name>
+      <url-pattern>/api/rest/world/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- must specify roles: if no roles are specified, no principal is produced -->
+      <role-name>user</role-name>
+    </auth-constraint>
+    <!--<user-data-constraint>-->
+    <!--<transport-guarantee>CONFIDENTIAL</transport-guarantee>-->
+    <!--</user-data-constraint>-->
+  </security-constraint>
+
+  <!-- Security roles referenced by this web application -->
+  <security-role>
+    <role-name>admin</role-name>
+  </security-role>
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/api/rest/auth/login</form-login-page>
+      <form-error-page>/api/rest/auth/login</form-error-page>
+    </form-login-config>
+  </login-config>
+
+
+</web-app>
