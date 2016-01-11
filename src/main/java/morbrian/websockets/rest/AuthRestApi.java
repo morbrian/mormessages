@@ -50,10 +50,7 @@ import java.util.Map;
   }
 
   private BaseResponse whoami() {
-    String username = ANONYMOUS;
-    if (principal != null) {
-      username = principal.getName();
-    }
+    String username = userPrincipalName();
     BaseResponse base = new BaseResponse(new Status(Status.Type.SUCCESS, username));
     base.addData(USERNAME, username);
     return base;
@@ -73,7 +70,7 @@ import java.util.Map;
 
   private BaseResponse login(String username, String password) {
     try {
-      if (principal != null) {
+      if (!ANONYMOUS.equals(userPrincipalName())) {
         request.logout();
       }
       request.login(username, password);
@@ -84,11 +81,22 @@ import java.util.Map;
     }
   }
 
+  private String userPrincipalName() {
+    try {
+      // when security enabled, principal may always be present
+      // but in jboss returns 'anonymous' as username
+      // and in tomcat calling getName() throws exception.
+      return principal.getName();
+    } catch(Throwable th) {
+      return ANONYMOUS;
+    }
+  }
   private WebApplicationException failedLogin(String details) {
     BaseResponse base = new BaseResponse(new Status(Status.Type.UNAUTHORIZED, details));
     Response error =
         Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(base)
             .build();
+    logger.error("FAILED AND RETURN ERROR: " + error);
     return new WebApplicationException(error);
   }
 

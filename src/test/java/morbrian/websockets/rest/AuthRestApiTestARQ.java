@@ -1,6 +1,5 @@
 package morbrian.websockets.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import morbrian.websockets.model.BaseResponse;
 import morbrian.websockets.model.Credentials;
 import morbrian.websockets.model.Status;
@@ -30,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class) public class AuthRestApiTestARQ {
 
   private static final RestConfigurationProvider configProvider = new RestConfigurationProvider();
+  private static final String AUTH_BASE_PATH = "/test/api/rest/auth/";
   private static Logger logger = LoggerFactory.getLogger(AuthRestApi.class);
   private Client client;
 
@@ -52,24 +52,23 @@ import static org.junit.Assert.assertTrue;
     client = null;
   }
 
-  @Test public void badCredentialLoginShouldRespondWithUnauthorized()
-      throws JsonProcessingException {
+  @Test public void badCredentialLoginShouldRespondWithUnauthorized() {
     Credentials credentials =
         new Credentials(configProvider.getUsername(), configProvider.randomAlphaNumericString());
-    BaseResponse base = invokeRequest(HttpMethod.POST, "/test/api/rest/auth/login", credentials);
+    BaseResponse base = invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
     assertEquals("status.type", Status.Type.UNAUTHORIZED.name(), base.getStatus().getType());
     assertEquals("status.code", Status.Type.UNAUTHORIZED.ordinal(), base.getStatus().getCode());
   }
 
-  @Test public void goodCredentialLoginShouldRespondWithSuccess() throws JsonProcessingException {
+  @Test public void goodCredentialLoginShouldRespondWithSuccess() {
     BaseResponse base =
-        invokeRequest(HttpMethod.POST, "/test/api/rest/auth/login", getCredentials());
+        invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", getCredentials());
     assertEquals("status.type", Status.Type.SUCCESS.name(), base.getStatus().getType());
     assertEquals("status.code", Status.Type.SUCCESS.ordinal(), base.getStatus().getCode());
   }
 
   @Test public void loggedOutWhoamiShouldRespondWithAnonymous() {
-    BaseResponse base = invokeRequest(HttpMethod.GET, "/test/api/rest/auth/whoami", null);
+    BaseResponse base = invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
     assertEquals("status.type", Status.Type.SUCCESS.name(), base.getStatus().getType());
     assertEquals("status.code", Status.Type.SUCCESS.ordinal(), base.getStatus().getCode());
     assertEquals("username", AuthRestApi.ANONYMOUS, base.getData().get(AuthRestApi.USERNAME));
@@ -77,8 +76,8 @@ import static org.junit.Assert.assertTrue;
 
   @Test public void loggedInWhoamiShouldRespondWithUsername() {
     Credentials credentials = getCredentials();
-    invokeRequest(HttpMethod.POST, "/test/api/rest/auth/login", credentials);
-    BaseResponse base = invokeRequest(HttpMethod.GET, "/test/api/rest/auth/whoami", null);
+    invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
+    BaseResponse base = invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
     assertEquals("status.type", Status.Type.SUCCESS.name(), base.getStatus().getType());
     assertEquals("status.code", Status.Type.SUCCESS.ordinal(), base.getStatus().getCode());
     assertEquals("username", credentials.getUsername(), base.getData().get(AuthRestApi.USERNAME));
@@ -86,13 +85,13 @@ import static org.junit.Assert.assertTrue;
 
   @Test public void logoutShouldRemoveSessionAuthorization() {
     Credentials credentials = getCredentials();
-    invokeRequest(HttpMethod.POST, "/test/api/rest/auth/login", credentials);
-    BaseResponse base = invokeRequest(HttpMethod.GET, "/test/api/rest/auth/whoami", null);
+    invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
+    BaseResponse base = invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
     // verify we are logged in
     assertEquals("username", credentials.getUsername(), base.getData().get(AuthRestApi.USERNAME));
 
     // now logout
-    base = invokeRequest(HttpMethod.DELETE, "/test/api/rest/auth/logout", null);
+    base = invokeRequest(HttpMethod.DELETE, AUTH_BASE_PATH + "logout", null);
     assertTrue("username",
         base.getData() == null || base.getData().get(AuthRestApi.USERNAME) == null);
     assertEquals("status.type", Status.Type.SUCCESS.name(), base.getStatus().getType());
