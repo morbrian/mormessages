@@ -1,4 +1,4 @@
-package morbrian.websockets.rest;
+package morbrian.test.provisioning;
 
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -8,20 +8,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class RestConfigurationProvider {
+public class ContainerConfigurationProvider {
 
   public static final String PROP_VENDOR = "arq.rest.vendor";
   public static final String PROP_HOSTPROTOCOLPORT = "arq.rest.hostProtocolPort";
   public static final String PROP_USERNAME = "arq.rest.username";
   public static final String PROP_PASSWORD = "arq.rest.password";
-  private Logger logger = LoggerFactory.getLogger(RestConfigurationProvider.class);
+  private Logger logger = LoggerFactory.getLogger(ContainerConfigurationProvider.class);
   private Vendor vendor;
   private String username;
   private String password;
   private String restProtocolHostPort;
   private VendorSpecificProvisioner vendorSpecificProvisioner;
 
-  public RestConfigurationProvider() {
+  public ContainerConfigurationProvider() {
     vendor = Vendor.valueOf(getStringPropertyWithFallback(PROP_VENDOR, Vendor.WILDFLY.name()).toUpperCase());
     restProtocolHostPort =
         getStringPropertyWithFallback(PROP_HOSTPROTOCOLPORT, "http://127.0.0.1:8080");
@@ -71,7 +71,10 @@ public class RestConfigurationProvider {
   }
 
   public JavaArchive createDeployment() {
-    return ShrinkWrap.create(JavaArchive.class).addPackages(true, "morbrian.websockets")
+    return ShrinkWrap.create(JavaArchive.class)
+        .addPackages(true, "morbrian.websockets")
+        .addPackages(true, "morbrian.test")
+        .addAsResource("test-persistence.xml", "META-INF/persistence.xml")
         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
   }
 

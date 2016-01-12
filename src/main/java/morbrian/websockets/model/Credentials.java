@@ -2,7 +2,7 @@ package morbrian.websockets.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "status") public class Credentials {
+public class Credentials {
 
   private String username;
   private String password;

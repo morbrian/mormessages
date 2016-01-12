@@ -22,7 +22,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>SimpleRequestInspectorServlet</web-resource-name>
-      <url-pattern>/api/rest/world/*</url-pattern>
+      <url-pattern>/api/rest/forum/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <!-- must specify roles: if no roles are specified, no principal is produced -->

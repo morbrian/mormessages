@@ -3,11 +3,11 @@ package morbrian.websockets.model;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "status") public class Status {
+public class Status {
 
-  @XmlElement(name = "code") private int code = -1;
-  @XmlElement(name = "type") private String type;
-  @XmlElement(name = "details") private String details;
+  private int code = -1;
+  private String type;
+  private String details;
 
   public Status() {
   }

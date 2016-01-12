@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashMap;
 import java.util.Map;
 
-@XmlRootElement(name = "response") public class BaseResponse {
+public class BaseResponse {
 
-  @XmlElement(name = "status") private Status status;
+  private Status status;
 
-  @XmlElement(name = "data") private Map<String, Object> data;
+ private Map<String, Object> data;
 
   public BaseResponse() {
   }

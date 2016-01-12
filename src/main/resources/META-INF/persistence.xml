@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="2.0" xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="
+        http://java.sun.com/xml/ns/persistence
+        http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="primary">
+    <!-- this specifies the implementation of the JPA specification, TomEE provides OpenJPA -->
+    <!--<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>-->
+    <!--<provider>org.hibernate.ejb.HibernatePersistence</provider>-->
+    <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+    <class>morbrian.websockets.model.ForumEntity</class>
+    <properties>
+      <!-- uncommenting these properties will update the schema in the database, useful primarily for development -->
+      <!-- these two are for the openjpa implementation native to TomEE -->
+      <!--<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema"/>-->
+      <!--<property name="openjpa.InitializeEagerly" value="true"/>-->
+      <!-- these net two are for the popular hibernate implementation of JPA -->
+       <property name="hibernate.hbm2ddl.auto" value="create"/>
+       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+    </properties>
+  </persistence-unit>
+</persistence>

@@ -1,12 +1,12 @@
-package morbrian.websockets.rest;
+package morbrian.test.provisioning;
 
 import org.jboss.as.domain.management.security.adduser.AddUser;
 
 public class TomeeProvisioner implements VendorSpecificProvisioner {
 
-    private RestConfigurationProvider configProvider;
+    private ContainerConfigurationProvider configProvider;
 
-    public TomeeProvisioner(RestConfigurationProvider configProvider) {
+    public TomeeProvisioner(ContainerConfigurationProvider configProvider) {
         this.configProvider = configProvider;
     }
 

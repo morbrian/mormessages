@@ -37,8 +37,13 @@ import java.util.Map;
   }
 
   @POST @Path("/login") @Produces(MediaType.APPLICATION_JSON)
-  public BaseResponse loginPost(Credentials authInfo) {
-    return login(authInfo.getUsername(), authInfo.getPassword());
+  public BaseResponse loginPost(Credentials credentials) {
+    if (credentials == null) {
+      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, "missing credentials"));
+      Response error = Response.status(Response.Status.BAD_REQUEST).entity(base).build();
+      throw new WebApplicationException(error);
+    }
+    return login(credentials.getUsername(), credentials.getPassword());
   }
 
   @GET @Path("/whoami") @Produces(MediaType.APPLICATION_JSON) public BaseResponse whoamiGet() {
@@ -74,8 +79,7 @@ import java.util.Map;
         request.logout();
       }
       request.login(username, password);
-      BaseResponse base = new BaseResponse(new Status(Status.Type.SUCCESS, username));
-      return base;
+      return new BaseResponse(new Status(Status.Type.SUCCESS, username));
     } catch (ServletException e) {
       throw failedLogin(username);
     }
@@ -96,7 +100,6 @@ import java.util.Map;
     Response error =
         Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(base)
             .build();
-    logger.error("FAILED AND RETURN ERROR: " + error);
     return new WebApplicationException(error);
   }
 
