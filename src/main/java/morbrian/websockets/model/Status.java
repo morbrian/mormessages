@@ -1,8 +1,5 @@
 package morbrian.websockets.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 public class Status {
 
   private int code = -1;

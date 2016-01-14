@@ -1,5 +1,6 @@
 package morbrian.test.provisioning;
 
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -22,7 +23,8 @@ public class ContainerConfigurationProvider {
   private VendorSpecificProvisioner vendorSpecificProvisioner;
 
   public ContainerConfigurationProvider() {
-    vendor = Vendor.valueOf(getStringPropertyWithFallback(PROP_VENDOR, Vendor.WILDFLY.name()).toUpperCase());
+    vendor = Vendor
+        .valueOf(getStringPropertyWithFallback(PROP_VENDOR, Vendor.WILDFLY.name()).toUpperCase());
     restProtocolHostPort =
         getStringPropertyWithFallback(PROP_HOSTPROTOCOLPORT, "http://127.0.0.1:8080");
     username = getStringPropertyWithFallback(PROP_USERNAME, "samplepreson");
@@ -38,7 +40,8 @@ public class ContainerConfigurationProvider {
       default:
         throw new IllegalArgumentException("vendor " + vendor + " not supported.");
     }
-    logger.info("VendorSpecificProvisioner Implementation: " + vendorSpecificProvisioner.getClass().getSimpleName());
+    logger.info("VendorSpecificProvisioner Implementation: " + vendorSpecificProvisioner.getClass()
+        .getSimpleName());
   }
 
   private static String getStringPropertyWithFallback(String key, String fallback) {
@@ -70,9 +73,8 @@ public class ContainerConfigurationProvider {
     return restProtocolHostPort;
   }
 
-  public JavaArchive createDeployment() {
-    return ShrinkWrap.create(JavaArchive.class)
-        .addPackages(true, "morbrian.websockets")
+  public Archive<?> createDeployment() {
+    return ShrinkWrap.create(JavaArchive.class).addPackages(true, "morbrian.websockets")
         .addPackages(true, "morbrian.test")
         .addAsResource("test-persistence.xml", "META-INF/persistence.xml")
         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");

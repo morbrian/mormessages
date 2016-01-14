@@ -27,9 +27,9 @@ import java.util.Map;
   public static final String ANONYMOUS = "anonymous";
   public static final String USERNAME = "username";
 
-  @Context HttpServletRequest request;
-  @Inject Principal principal;
-  @Inject Logger logger;
+  @Context private HttpServletRequest request;
+  @Inject private Principal principal;
+  @Inject private Logger logger;
 
   @GET @Path("/login") @Produces(MediaType.APPLICATION_JSON) public BaseResponse loginGet() {
     Map<String, Object> data = new HashMap<>();
@@ -91,10 +91,11 @@ import java.util.Map;
       // but in jboss returns 'anonymous' as username
       // and in tomcat calling getName() throws exception.
       return principal.getName();
-    } catch(Throwable th) {
+    } catch (Throwable th) {
       return ANONYMOUS;
     }
   }
+
   private WebApplicationException failedLogin(String details) {
     BaseResponse base = new BaseResponse(new Status(Status.Type.UNAUTHORIZED, details));
     Response error =

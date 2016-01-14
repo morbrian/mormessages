@@ -59,16 +59,16 @@
     <finalName>${project.artifactId}</finalName>
     <plugins>
       <!--<plugin>-->
-        <!--<groupId>com.webcohesion.enunciate</groupId>-->
-        <!--<artifactId>enunciate-maven-plugin</artifactId>-->
-        <!--<version>${maven.enunciate.plugin.version}</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<goals>-->
-              <!--<goal>assemble</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-        <!--</executions>-->
+      <!--<groupId>com.webcohesion.enunciate</groupId>-->
+      <!--<artifactId>enunciate-maven-plugin</artifactId>-->
+      <!--<version>${maven.enunciate.plugin.version}</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<goals>-->
+      <!--<goal>assemble</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--</executions>-->
       <!--</plugin>-->
     </plugins>
   </build>

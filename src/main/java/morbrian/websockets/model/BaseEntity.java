@@ -12,12 +12,12 @@ import java.util.Calendar;
 
 @MappedSuperclass @EntityListeners({BaseEntityListener.class}) public class BaseEntity {
 
-  @Temporal(TemporalType.TIMESTAMP) @Column(name = "created_time", updatable = false) Calendar
-      createdTime;
-  @Temporal(TemporalType.TIMESTAMP) @Column(name = "modified_time") Calendar modifiedTime;
-  @Column(name = "created_by_uid", updatable = false, length = 255, nullable = false) String
+  @Temporal(TemporalType.TIMESTAMP) @Column(name = "created_time", updatable = false)
+  private Calendar createdTime;
+  @Temporal(TemporalType.TIMESTAMP) @Column(name = "modified_time") private Calendar modifiedTime;
+  @Column(name = "created_by_uid", updatable = false, length = 255, nullable = false) private String
       createdByUid;
-  @Column(name = "modified_by_uid", length = 255, nullable = false) String modifiedByUid;
+  @Column(name = "modified_by_uid", length = 255, nullable = false) private String modifiedByUid;
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
   public Long getId() {

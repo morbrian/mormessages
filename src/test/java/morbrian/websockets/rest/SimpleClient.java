@@ -22,7 +22,8 @@ public class SimpleClient {
     WebTarget target = client.target(baseUrl + path);
     Invocation.Builder builder = target.request().accept(MediaType.APPLICATION_JSON);
 
-    Invocation invocation;;
+    Invocation invocation;
+
     if (data == null) {
       invocation = builder.build(method);
     } else {

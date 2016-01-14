@@ -8,7 +8,7 @@ import morbrian.websockets.model.Credentials;
 import morbrian.websockets.model.Status;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.Archive;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,13 +25,13 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class) public class AuthRestApiTest {
 
-  private static final ContainerConfigurationProvider
-      configProvider = new ContainerConfigurationProvider();
+  private static final ContainerConfigurationProvider configProvider =
+      new ContainerConfigurationProvider();
   private static final String AUTH_BASE_PATH = "/test/api/rest/auth/";
   private static Logger logger = LoggerFactory.getLogger(AuthRestApi.class);
   private SimpleClient client;
 
-  @Deployment public static JavaArchive createDeployment() {
+  @Deployment public static Archive<?> createDeployment() {
     return configProvider.createDeployment();
   }
 
@@ -49,14 +49,15 @@ import static org.junit.Assert.assertTrue;
     client = null;
   }
 
-  @Test public void badCredentialLoginShouldRespondWithUnauthorized()
-      throws Exception {
-    Credentials credentials =
-        new Credentials(configProvider.getUsername(), ContainerConfigurationProvider.randomAlphaNumericString());
+  @Test public void badCredentialLoginShouldRespondWithUnauthorized() throws Exception {
+    Credentials credentials = new Credentials(configProvider.getUsername(),
+        ContainerConfigurationProvider.randomAlphaNumericString());
     ObjectMapper mapper = new ObjectMapper();
     System.out.println(mapper.writeValueAsString(credentials));
-    Response response = client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
-    assertEquals("response.status", Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+    Response response =
+        client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
+    assertEquals("response.status", Response.Status.UNAUTHORIZED.getStatusCode(),
+        response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
     response.close();
     assertEquals("status.type", Status.Type.UNAUTHORIZED.name(), base.getStatus().getType());
@@ -64,7 +65,8 @@ import static org.junit.Assert.assertTrue;
   }
 
   @Test public void goodCredentialLoginShouldRespondWithSuccess() throws Exception {
-    Response response = client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", getCredentials());
+    Response response =
+        client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", getCredentials());
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
     response.close();
@@ -114,7 +116,8 @@ import static org.junit.Assert.assertTrue;
   }
 
   private Credentials getCredentials() throws Exception {
-    Credentials credentials =  new Credentials(configProvider.getUsername(), configProvider.getPassword());
+    Credentials credentials =
+        new Credentials(configProvider.getUsername(), configProvider.getPassword());
     ObjectMapper mapper = new ObjectMapper();
     System.out.println("CREDENTIALS: " + mapper.writeValueAsString(credentials));
     return credentials;

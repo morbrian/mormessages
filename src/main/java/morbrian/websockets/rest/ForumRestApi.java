@@ -39,18 +39,21 @@ import java.util.List;
     return new ArrayList<>();
   }
 
-  @POST @Path("/{id}") @Produces(MediaType.APPLICATION_JSON) public ForumEntity modifyForum(@PathParam("id") String forumId, ForumEntity forum) {
+  @POST @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity modifyForum(@PathParam("id") String forumId, ForumEntity forum) {
     return null;
   }
 
-  @PUT @Path("/") @Produces(MediaType.APPLICATION_JSON) public ForumEntity createForum(ForumEntity forum, @Context final HttpServletResponse response) throws Exception {
+  @PUT @Path("/") @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity createForum(ForumEntity forum, @Context final HttpServletResponse response)
+      throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     logger.info("RECEIVED: " + mapper.writeValueAsString(forum));
     try {
       persistence.createForum(forum);
       response.setStatus(HttpServletResponse.SC_CREATED);
       response.flushBuffer();
-    } catch(Exception exc) {
+    } catch (Exception exc) {
       logger.error("CREATE FAILED", exc);
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, "create failed"));
       Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();

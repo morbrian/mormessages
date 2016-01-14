@@ -1,7 +1,5 @@
 package morbrian.websockets.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +7,7 @@ public class BaseResponse {
 
   private Status status;
 
- private Map<String, Object> data;
+  private Map<String, Object> data;
 
   public BaseResponse() {
   }
