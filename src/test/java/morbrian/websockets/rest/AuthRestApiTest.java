@@ -116,11 +116,7 @@ import static org.junit.Assert.assertTrue;
   }
 
   private Credentials getCredentials() throws Exception {
-    Credentials credentials =
-        new Credentials(configProvider.getUsername(), configProvider.getPassword());
-    ObjectMapper mapper = new ObjectMapper();
-    System.out.println("CREDENTIALS: " + mapper.writeValueAsString(credentials));
-    return credentials;
+    return new Credentials(configProvider.getUsername(), configProvider.getPassword());
   }
 
 }

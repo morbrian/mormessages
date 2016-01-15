@@ -5,6 +5,7 @@ import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
 import morbrian.websockets.model.Credentials;
 import morbrian.websockets.model.ForumEntity;
+import morbrian.websockets.model.ForumEntityTest;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -55,7 +56,6 @@ public class ForumRestApiTest {
   }
 
   @After public void teardown() {
-    client.invokeRequest(HttpMethod.DELETE, AUTH_BASE_PATH + "logout", null);
     client = null;
     credentials = null;
     mapper = null;
@@ -71,30 +71,26 @@ public class ForumRestApiTest {
   }
 
   @Test public void m02shouldCreateNewForum() throws IOException {
-    // TODO
-    //    ForumEntity expectedForum = createRandomNewForum();
-    //    Response response = client.invokeRequest(HttpMethod.PUT, FORUM_BASE_PATH, expectedForum);
-    //    assertEquals("response", Response.Status.CREATED.getStatusCode(), response.getStatus());
-    //    ForumEntity createdForum = response.readEntity(ForumEntity.class);
-    //    response.close();
-    //    assertEquals("forum.title", expectedForum.getTitle(), createdForum.getTitle());
-    //    assertEquals("forum.description", expectedForum.getDescription(), createdForum.getDescription());
-    //    assertEquals("forum.imageUrl", expectedForum.getImageUrl(), createdForum.getImageUrl());
-    //    assertEquals("forum.createdBy", credentials.getUsername(), createdForum.getCreatedByUid());
-    //
-    //    System.out.println("REST TEST FORUM DATA: " + mapper.writeValueAsString(createdForum));
+    ForumEntity expectedForum = ForumEntityTest.createRandomNewForum();
+    Response response = client.invokeRequest(HttpMethod.PUT, FORUM_BASE_PATH, expectedForum);
+    assertEquals("response", Response.Status.CREATED.getStatusCode(), response.getStatus());
+    // TODO: I spent hours trying to make this line of code work but it never did.
+    // TODO: It consistently said it could not find a MessageBodyReader for */* and ForumEntity
+    // TODO: I tried various dependency changes and registered various providers, and still nothing.
+    // ForumEntity createdForum = response.readEntity(ForumEntity.class);
+    String forumString = response.readEntity(String.class);
+    ObjectMapper mapper = new ObjectMapper();
+    ForumEntity createdForum = mapper.readValue(forumString, ForumEntity.class);
+    response.close();
+    assertEquals("forum.title", expectedForum.getTitle(), createdForum.getTitle());
+    assertEquals("forum.description", expectedForum.getDescription(),
+        createdForum.getDescription());
+    assertEquals("forum.imageUrl", expectedForum.getImageUrl(), createdForum.getImageUrl());
+    assertEquals("forum.createdBy", credentials.getUsername(), createdForum.getCreatedByUid());
   }
 
   private Credentials getCredentials() {
     return new Credentials(configProvider.getUsername(), configProvider.getPassword());
-  }
-
-  private ForumEntity createRandomNewForum() {
-    ForumEntity expectedForum =
-        new ForumEntity(ContainerConfigurationProvider.randomAlphaNumericString(),
-            ContainerConfigurationProvider.randomAlphaNumericString(),
-            ContainerConfigurationProvider.randomAlphaNumericString());
-    return expectedForum;
   }
 
 }

@@ -3,6 +3,7 @@ package morbrian.websockets.persistence;
 import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
 import morbrian.websockets.model.ForumEntity;
+import morbrian.websockets.model.ForumEntityTest;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -69,7 +70,7 @@ import static org.junit.Assert.assertNotNull;
     for (int i = 0; i < sampleData.size(); i++) {
       ForumEntity expectedForum = sampleData.get(i);
       ForumEntity foundForum = repository.findForumById(expectedForum.getId());
-      verifyEqualityOfAllAttributes("found", expectedForum, foundForum);
+      ForumEntityTest.verifyEqualityOfAllAttributes("found", expectedForum, foundForum);
     }
   }
 
@@ -78,24 +79,8 @@ import static org.junit.Assert.assertNotNull;
     sampleData.sort(ForumCreatedTimeComparator);
     assertEquals("equal list sizes", sampleData.size(), forumList.size());
     for (int i = 0; i < sampleData.size(); i++) {
-      verifyEqualityOfAllAttributes("item-" + i, sampleData.get(i), forumList.get(i));
+      ForumEntityTest.verifyEqualityOfAllAttributes("item-" + i, sampleData.get(i), forumList.get(i));
     }
   }
 
-  private void verifyEqualityOfAllAttributes(String tag, ForumEntity expectedForum,
-      ForumEntity forum) {
-    assertEquals(tag + " forum.id", expectedForum.getId(), forum.getId());
-    assertEquals(tag + " forum.getCreatedByUid", expectedForum.getCreatedByUid(),
-        forum.getCreatedByUid());
-    assertEquals(tag + " forum.getCreatedTime", expectedForum.getCreatedTime(),
-        forum.getCreatedTime());
-    assertEquals(tag + " forum.getModifiedByUid", expectedForum.getModifiedByUid(),
-        forum.getModifiedByUid());
-    assertEquals(tag + " forum.getModifiedTime", expectedForum.getModifiedTime(),
-        forum.getModifiedTime());
-    assertEquals(tag + " forum.getTitle", expectedForum.getTitle(), forum.getTitle());
-    assertEquals(tag + " forum.getDescription", expectedForum.getDescription(),
-        forum.getDescription());
-    assertEquals(tag + " forum.getImageUrl", expectedForum.getImageUrl(), forum.getImageUrl());
-  }
 }

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -44,22 +45,22 @@ import java.util.List;
     return null;
   }
 
-  @PUT @Path("/") @Produces(MediaType.APPLICATION_JSON)
+  @PUT @Path("/") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
   public ForumEntity createForum(ForumEntity forum, @Context final HttpServletResponse response)
       throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     logger.info("RECEIVED: " + mapper.writeValueAsString(forum));
     try {
-      persistence.createForum(forum);
+      ForumEntity createdForum = persistence.createForum(forum);
       response.setStatus(HttpServletResponse.SC_CREATED);
       response.flushBuffer();
+      return createdForum;
     } catch (Exception exc) {
       logger.error("CREATE FAILED", exc);
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, "create failed"));
       Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();
       throw new WebApplicationException(error);
     }
-    return forum;
   }
 
   @DELETE @Path("/{id}") @Produces(MediaType.APPLICATION_JSON) public void deleteForum() {

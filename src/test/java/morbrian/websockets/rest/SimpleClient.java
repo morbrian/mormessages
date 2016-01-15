@@ -20,7 +20,7 @@ public class SimpleClient {
 
   public Response invokeRequest(String method, String path, Object data) {
     WebTarget target = client.target(baseUrl + path);
-    Invocation.Builder builder = target.request().accept(MediaType.APPLICATION_JSON);
+    Invocation.Builder builder = target.request().accept(MediaType.APPLICATION_JSON_TYPE);
 
     Invocation invocation;
 
