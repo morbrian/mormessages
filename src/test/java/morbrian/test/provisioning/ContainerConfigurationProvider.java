@@ -12,22 +12,17 @@ import java.util.UUID;
 public class ContainerConfigurationProvider {
 
   public static final String PROP_VENDOR = "arq.rest.vendor";
-  public static final String PROP_HOSTPROTOCOLPORT = "arq.rest.hostProtocolPort";
   public static final String PROP_USERNAME = "arq.rest.username";
   public static final String PROP_PASSWORD = "arq.rest.password";
-  private Logger logger = LoggerFactory.getLogger(ContainerConfigurationProvider.class);
-  private Vendor vendor;
-  private String username;
-  private String password;
-  private String restProtocolHostPort;
+  private final String username;
+  private final String password;
+  private final Logger logger = LoggerFactory.getLogger(ContainerConfigurationProvider.class);
   private VendorSpecificProvisioner vendorSpecificProvisioner;
 
   public ContainerConfigurationProvider() {
-    vendor = Vendor
+    Vendor vendor = Vendor
         .valueOf(getStringPropertyWithFallback(PROP_VENDOR, Vendor.WILDFLY.name()).toUpperCase());
-    restProtocolHostPort =
-        getStringPropertyWithFallback(PROP_HOSTPROTOCOLPORT, "http://127.0.0.1:8080");
-    username = getStringPropertyWithFallback(PROP_USERNAME, "samplepreson");
+    username = getStringPropertyWithFallback(PROP_USERNAME, "sampleperson");
     password = getStringPropertyWithFallback(PROP_PASSWORD, "changeme");
 
     switch (vendor) {
@@ -69,10 +64,6 @@ public class ContainerConfigurationProvider {
     return password;
   }
 
-  public String getRestProtocolHostPort() {
-    return restProtocolHostPort;
-  }
-
   public Archive<?> createDeployment() {
     return ShrinkWrap.create(JavaArchive.class).addPackages(true, "morbrian.websockets")
         .addPackages(true, "morbrian.test")
@@ -86,7 +77,7 @@ public class ContainerConfigurationProvider {
 
   public enum Vendor {
     WILDFLY("wildfly"), TOMEE("tomee");
-    private String value;
+    private final String value;
 
     Vendor(String value) {
       this.value = value;

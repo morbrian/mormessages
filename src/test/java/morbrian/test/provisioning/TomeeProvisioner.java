@@ -2,10 +2,8 @@ package morbrian.test.provisioning;
 
 public class TomeeProvisioner implements VendorSpecificProvisioner {
 
-  private ContainerConfigurationProvider configProvider;
-
   public TomeeProvisioner(ContainerConfigurationProvider configProvider) {
-    this.configProvider = configProvider;
+    //TODO
   }
 
   @Override public void setup() {

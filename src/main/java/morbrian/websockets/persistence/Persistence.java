@@ -1,6 +1,8 @@
 package morbrian.websockets.persistence;
 
+import morbrian.websockets.model.BaseEntity;
 import morbrian.websockets.model.ForumEntity;
+import morbrian.websockets.model.MessageEntity;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -8,31 +10,37 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.security.Principal;
 
-/**
- * Created by morbrian on 6/17/15.
- */
 @Stateless public class Persistence {
-  @Inject private Logger log;
+  @Inject private Logger logger;
   @Inject private Principal principal;
   @Inject private EntityManager em;
 
-  public ForumEntity createForum(ForumEntity entity) {
+  public BaseEntity createEntity(BaseEntity entity) {
     entity.setCreatedByUid(principal.getName());
     entity.setModifiedByUid(principal.getName());
     em.persist(entity);
     return entity;
   }
 
-  public ForumEntity updateForum(ForumEntity entity) {
-    entity.setCreatedByUid(principal.getName());
+  public BaseEntity updateEntity(BaseEntity entity) {
     entity.setModifiedByUid(principal.getName());
-    em.merge(entity);
-    return entity;
+    return em.merge(entity);
   }
 
-  public void removeForum(ForumEntity entity) {
-    em.remove(em.find(ForumEntity.class, entity.getId()));
+  public void removeEntity(BaseEntity entity) {
+    em.remove(em.find(entity.getClass(), entity.getId()));
   }
 
+  public ForumEntity createForum(ForumEntity entity) {
+    return (ForumEntity) createEntity(entity);
+  }
+
+  public ForumEntity updateForum(ForumEntity entity) {
+    return (ForumEntity) updateEntity(entity);
+  }
+
+  public MessageEntity createMessage(MessageEntity entity) {
+    return (MessageEntity) createEntity(entity);
+  }
 
 }

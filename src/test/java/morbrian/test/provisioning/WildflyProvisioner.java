@@ -4,7 +4,7 @@ import org.jboss.as.domain.management.security.adduser.AddUser;
 
 public class WildflyProvisioner implements VendorSpecificProvisioner {
 
-  private ContainerConfigurationProvider configProvider;
+  private final ContainerConfigurationProvider configProvider;
 
   public WildflyProvisioner(ContainerConfigurationProvider configProvider) {
     this.configProvider = configProvider;

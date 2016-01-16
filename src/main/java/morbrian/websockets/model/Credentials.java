@@ -27,9 +27,7 @@ public class Credentials {
     }
 
     Credentials otherBase = (Credentials) other;
-    return
-        (username != null && username.equals(otherBase.username) || username == otherBase.username)
-            && (password != null && password.equals(otherBase.password)
-            || password == otherBase.password);
+    return (username == null ? otherBase.username == null : username.equals(otherBase.username))
+        && (password == null ? otherBase.password == null : password.equals(otherBase.password));
   }
 }

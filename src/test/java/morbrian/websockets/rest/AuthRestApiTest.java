@@ -8,17 +8,17 @@ import morbrian.websockets.model.Credentials;
 import morbrian.websockets.model.Status;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
+import java.net.URL;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,8 +27,8 @@ import static org.junit.Assert.assertTrue;
 
   private static final ContainerConfigurationProvider configProvider =
       new ContainerConfigurationProvider();
-  private static final String AUTH_BASE_PATH = "/test/api/rest/auth/";
-  private static Logger logger = LoggerFactory.getLogger(AuthRestApi.class);
+  private static final String AUTH_BASE_PATH = "api/rest/auth/";
+  @ArquillianResource private URL webappUrl;
   private SimpleClient client;
 
   @Deployment public static Archive<?> createDeployment() {
@@ -41,11 +41,11 @@ import static org.junit.Assert.assertTrue;
   }
 
   @Before public void setup() {
-    client = new SimpleClient(configProvider.getRestProtocolHostPort());
+    client = new SimpleClient(webappUrl.toString());
   }
 
   @After public void teardown() {
-    client.invokeRequest(HttpMethod.DELETE, "/test/api/rest/auth/logout", null).close();
+    client.delete(Arrays.asList(AUTH_BASE_PATH, "logout"), null).close();
     client = null;
   }
 
@@ -54,8 +54,7 @@ import static org.junit.Assert.assertTrue;
         ContainerConfigurationProvider.randomAlphaNumericString());
     ObjectMapper mapper = new ObjectMapper();
     System.out.println(mapper.writeValueAsString(credentials));
-    Response response =
-        client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials);
+    Response response = client.post(credentials, Arrays.asList(AUTH_BASE_PATH, "login"), null);
     assertEquals("response.status", Response.Status.UNAUTHORIZED.getStatusCode(),
         response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
@@ -65,8 +64,7 @@ import static org.junit.Assert.assertTrue;
   }
 
   @Test public void goodCredentialLoginShouldRespondWithSuccess() throws Exception {
-    Response response =
-        client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", getCredentials());
+    Response response = client.post(getCredentials(), Arrays.asList(AUTH_BASE_PATH, "login"), null);
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
     response.close();
@@ -75,7 +73,7 @@ import static org.junit.Assert.assertTrue;
   }
 
   @Test public void loggedOutWhoamiShouldRespondWithAnonymous() {
-    Response response = client.invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
+    Response response = client.get(Arrays.asList(AUTH_BASE_PATH, "whoami"), null);
     BaseResponse base = response.readEntity(BaseResponse.class);
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     response.close();
@@ -86,8 +84,8 @@ import static org.junit.Assert.assertTrue;
 
   @Test public void loggedInWhoamiShouldRespondWithUsername() throws Exception {
     Credentials credentials = getCredentials();
-    client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials).close();
-    Response response = client.invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
+    client.post(credentials, Arrays.asList(AUTH_BASE_PATH, "login"), null).close();
+    Response response = client.get(Arrays.asList(AUTH_BASE_PATH, "whoami"), null);
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
     response.close();
@@ -98,15 +96,15 @@ import static org.junit.Assert.assertTrue;
 
   @Test public void logoutShouldRemoveSessionAuthorization() throws Exception {
     Credentials credentials = getCredentials();
-    client.invokeRequest(HttpMethod.POST, AUTH_BASE_PATH + "login", credentials).close();
-    Response response = client.invokeRequest(HttpMethod.GET, AUTH_BASE_PATH + "whoami", null);
+    client.post(credentials, Arrays.asList(AUTH_BASE_PATH, "login"), null).close();
+    Response response = client.get(Arrays.asList(AUTH_BASE_PATH, "whoami"), null);
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     BaseResponse base = response.readEntity(BaseResponse.class);
     // verify we are logged in
     assertEquals("username", credentials.getUsername(), base.getData().get(AuthRestApi.USERNAME));
 
     // now logout
-    response = client.invokeRequest(HttpMethod.DELETE, AUTH_BASE_PATH + "logout", null);
+    response = client.delete(Arrays.asList(AUTH_BASE_PATH, "logout"), null);
     assertEquals("response.status", Response.Status.OK.getStatusCode(), response.getStatus());
     base = response.readEntity(BaseResponse.class);
     response.close();
@@ -115,7 +113,7 @@ import static org.junit.Assert.assertTrue;
     assertEquals("status.type", Status.Type.SUCCESS.name(), base.getStatus().getType());
   }
 
-  private Credentials getCredentials() throws Exception {
+  private Credentials getCredentials() {
     return new Credentials(configProvider.getUsername(), configProvider.getPassword());
   }
 

@@ -37,16 +37,16 @@ public class Status {
     }
 
     Status otherStatus = (Status) other;
-    return code == otherStatus.code && (type != null && type.equals(otherStatus.type)
-        || type == otherStatus.type) && (details != null && details.equals(otherStatus.details)
-        || details == otherStatus.details);
+    return code == otherStatus.code && (type == null ?
+        otherStatus.type == null :
+        type.equals(otherStatus.type)) && (details == null ?
+        otherStatus.details == null :
+        details.equals(otherStatus.details));
   }
 
   public enum Type {
     SUCCESS("success"), UNSPECIFIED("unspecified"), ERROR("error"), UNAUTHORIZED("unauthorized");
-
-    private String value;
-
+    private final String value;
     Type(String value) {
       this.value = value;
     }

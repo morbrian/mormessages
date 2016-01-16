@@ -4,15 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
 import morbrian.websockets.model.ForumEntity;
+import morbrian.websockets.model.ForumEntityTest;
+import morbrian.websockets.model.MessageEntity;
+import morbrian.websockets.model.MessageEntityTest;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 
 import static org.junit.Assert.*;
 
@@ -20,9 +26,9 @@ import static org.junit.Assert.*;
 
   private static final ContainerConfigurationProvider configProvider =
       new ContainerConfigurationProvider();
-
-  @Inject Repository repository;
-  @Inject Persistence persistence;
+  @Rule public final ExpectedException exception = ExpectedException.none();
+  @Inject private Repository repository;
+  @Inject private Persistence persistence;
 
   @Deployment public static Archive<?> createDeployment() {
     return configProvider.createDeployment();
@@ -39,7 +45,7 @@ import static org.junit.Assert.*;
   }
 
   @Test public void shouldCreateForum() throws JsonProcessingException {
-    ForumEntity expectedForum = createRandomNewForum();
+    ForumEntity expectedForum = ForumEntityTest.createRandomNewForum();
     ForumEntity createdForum = persistence.createForum(expectedForum);
 
     assertTrue("forum id greater than 0", createdForum.getId() > 0);
@@ -49,10 +55,10 @@ import static org.junit.Assert.*;
   }
 
   @Test public void shouldUpdateForum() throws JsonProcessingException {
-    ForumEntity forum = persistence.createForum(createRandomNewForum());
+    ForumEntity forum = persistence.createForum(ForumEntityTest.createRandomNewForum());
     assertTrue("forum id greater than 0", forum.getId() > 0);
 
-    ForumEntity expectedForum = createRandomNewForum();
+    ForumEntity expectedForum = ForumEntityTest.createRandomNewForum();
     forum.setTitle(expectedForum.getTitle());
     forum.setDescription(expectedForum.getDescription());
     forum.setImageUrl(expectedForum.getImageUrl());
@@ -69,10 +75,21 @@ import static org.junit.Assert.*;
     assertTrue("forum modifiedByUid not empty", !modifiedForum.getCreatedByUid().isEmpty());
   }
 
-  private ForumEntity createRandomNewForum() {
-    return new ForumEntity(ContainerConfigurationProvider.randomAlphaNumericString(),
-        ContainerConfigurationProvider.randomAlphaNumericString(),
-        ContainerConfigurationProvider.randomAlphaNumericString());
+  @Test public void shouldCreateMessage() throws JsonProcessingException {
+    ForumEntity createdForum = persistence.createForum(ForumEntityTest.createRandomNewForum());
+    MessageEntity expectedMessage = MessageEntityTest.createRandomNewMessage(createdForum.getId());
+    MessageEntity createdMessage = persistence.createMessage(expectedMessage);
+
+    assertTrue("message id greater than 0", createdMessage.getId() > 0);
+    assertNotNull("message createdTime not null", createdMessage.getCreatedTime());
+    assertNotNull("message createdByUid not null", createdMessage.getCreatedByUid());
+    assertTrue("message createdByUid not empty", !createdMessage.getCreatedByUid().isEmpty());
+  }
+
+  @Test public void shouldThrowExceptionOnConstraintViolation() throws JsonProcessingException {
+    MessageEntity expectedMessage = MessageEntityTest.createRandomNewMessage(999999l);
+    exception.expect(PersistenceException.class);
+    persistence.createMessage(expectedMessage);
   }
 
 }

@@ -19,8 +19,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 @Path("/auth") @RequestScoped public class AuthRestApi {
 
@@ -32,7 +30,6 @@ import java.util.Map;
   @Inject private Logger logger;
 
   @GET @Path("/login") @Produces(MediaType.APPLICATION_JSON) public BaseResponse loginGet() {
-    Map<String, Object> data = new HashMap<>();
     throw failedLogin("unsupported login method: GET");
   }
 

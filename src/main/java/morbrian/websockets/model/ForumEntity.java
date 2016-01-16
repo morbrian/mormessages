@@ -3,12 +3,25 @@ package morbrian.websockets.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.enterprise.context.Dependent;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-@Entity @Table(name = "forum") public class ForumEntity extends BaseEntity {
+@NamedQueries({@NamedQuery(
+    name = ForumEntity.FIND_ALL_ORDERED_BY_CREATED_TIME,
+    query = "SELECT e FROM ForumEntity e ORDER BY e.createdTime"), @NamedQuery(
+    name = ForumEntity.FIND_ONE_BY_ID,
+    query = "SELECT e FROM ForumEntity e WHERE e.id = :id")}) @Entity @Table(name = "forum")
+@Dependent public class ForumEntity extends BaseEntity {
+
+  public static final String FIND_ALL_ORDERED_BY_CREATED_TIME =
+      "ForumEntity.findAllOrderedByCreatedTime";
+
+  public static final String FIND_ONE_BY_ID = "ForumEntity.findOneById";
 
   @NotNull @Column(name = "title", length = 255, unique = true, nullable = false) private String
       title;
@@ -16,8 +29,13 @@ import javax.validation.constraints.NotNull;
   @Column(name = "description", length = 255, unique = false, nullable = true) private String
       description;
 
-  @Column(name = "image_url", length = 255, unique = false, nullable = true) private String
+  @Column(name = "image_url", length = 1024, unique = false, nullable = true) private String
       imageUrl;
+
+  //@JsonIgnore
+  //@OneToMany(mappedBy = "forumId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  //private List<MessageEntity> messages;
+
 
   public ForumEntity() {
   }
@@ -58,4 +76,9 @@ import javax.validation.constraints.NotNull;
   public void setDescription(String description) {
     this.description = description;
   }
+
+  //  public List<MessageEntity> getMessages() {
+  //    return messages;
+  //  }
+
 }

@@ -3,33 +3,63 @@ package morbrian.websockets.rest;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
 public class SimpleClient {
 
-  private Client client;
-  private String baseUrl;
+  private final Client client;
+  private final WebTarget target;
+  private final String baseUrl;
 
   public SimpleClient(String baseUrl) {
     this.baseUrl = baseUrl;
     client = ClientBuilder.newClient();
+    target = client.target(baseUrl);
   }
 
-  public Response invokeRequest(String method, String path, Object data) {
-    WebTarget target = client.target(baseUrl + path);
-    Invocation.Builder builder = target.request().accept(MediaType.APPLICATION_JSON_TYPE);
+  public Response get(List<Object> path, Map<String, Object> params) {
+    WebTarget targetGet = applyPath(target, path);
+    targetGet = applyParams(targetGet, params);
+    return targetGet.request(MediaType.APPLICATION_JSON).get();
+  }
 
-    Invocation invocation;
+  public Response post(Object data, List<Object> path, Map<String, Object> params) {
+    WebTarget targetPost = applyPath(target, path);
+    targetPost = applyParams(targetPost, params);
+    return targetPost.request(MediaType.APPLICATION_JSON).post(Entity.json(data));
+  }
 
-    if (data == null) {
-      invocation = builder.build(method);
-    } else {
-      invocation = builder.build(method, Entity.json(data));
+  public Response put(Object data, List<Object> path, Map<String, Object> params) {
+    WebTarget targetPost = applyPath(target, path);
+    targetPost = applyParams(targetPost, params);
+    return targetPost.request(MediaType.APPLICATION_JSON).put(Entity.json(data));
+  }
+
+  public Response delete(List<Object> path, Map<String, Object> params) {
+    WebTarget targetPost = applyPath(target, path);
+    targetPost = applyParams(targetPost, params);
+    return targetPost.request(MediaType.APPLICATION_JSON).delete();
+  }
+
+  private WebTarget applyParams(WebTarget target, Map<String, Object> params) {
+    if (params != null) {
+      for (String key : params.keySet()) {
+        target = target.queryParam(key, params.get(key));
+      }
     }
+    return target;
+  }
 
-    return invocation.invoke();
+  private WebTarget applyPath(WebTarget target, List<Object> path) {
+    if (path != null) {
+      for (Object p : path) {
+        target = target.path(p.toString());
+      }
+    }
+    return target;
   }
 }

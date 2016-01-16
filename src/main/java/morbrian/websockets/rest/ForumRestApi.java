@@ -1,12 +1,11 @@
 package morbrian.websockets.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import morbrian.websockets.controller.Controller;
+import morbrian.websockets.model.BaseEntity;
 import morbrian.websockets.model.BaseResponse;
 import morbrian.websockets.model.ForumEntity;
+import morbrian.websockets.model.MessageEntity;
 import morbrian.websockets.model.Status;
-import morbrian.websockets.persistence.Persistence;
-import morbrian.websockets.persistence.Repository;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -19,52 +18,78 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-// these authorization tags aren't working, not sure why
-//@RolesAllowed({"admin"})
 @Path("/forum") @RequestScoped public class ForumRestApi {
 
-  @Inject private Persistence persistence;
-  @Inject private Repository repository;
-  @Inject private Principal principal;
-  @Inject private Logger logger;
+  @Inject private Controller controller;
 
   @GET @Path("/") @Produces(MediaType.APPLICATION_JSON) public List<ForumEntity> forumList() {
-    return new ArrayList<>();
+    return controller.forumList();
   }
 
-  @POST @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
-  public ForumEntity modifyForum(@PathParam("id") String forumId, ForumEntity forum) {
-    return null;
+  @GET @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity getForumById(@PathParam("id") Long forumId) {
+    return controller.getForumById(forumId);
+  }
+
+  @POST @Path("/{id}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity modifyForum(@PathParam("id") Long forumId, ForumEntity forum) {
+    if (!forumId.equals(forum.getId())) {
+      BaseResponse base = new BaseResponse(
+          new Status(Status.Type.ERROR, "url path forumId does not match posted forum.id"));
+      Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();
+      throw new WebApplicationException(error);
+    }
+    return controller.modifyForum(forum);
   }
 
   @PUT @Path("/") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
   public ForumEntity createForum(ForumEntity forum, @Context final HttpServletResponse response)
       throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
-    logger.info("RECEIVED: " + mapper.writeValueAsString(forum));
+    return (ForumEntity) createEntity(() -> controller.createForum(forum), response);
+  }
+
+  @DELETE @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
+  public void deleteForum(@PathParam("id") Long forumId) {
+    controller.deleteForum(forumId);
+  }
+
+  @GET @Path("/{id}/message") @Produces(MediaType.APPLICATION_JSON)
+  public List<MessageEntity> messageList(@PathParam("id") Long forumId,
+      @QueryParam("lessThanId") Long lowId, @QueryParam("greaterThanId") Long highId) {
+    if (lowId != null || highId != null) {
+      return controller.messageListFilteredById(forumId, lowId, highId);
+    } else {
+      return controller.messageList(forumId);
+    }
+  }
+
+  @PUT @Path("/{id}/message") @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public MessageEntity postMessageToForum(MessageEntity message, @PathParam("id") Long forumId,
+      @Context final HttpServletResponse response) throws Exception {
+    return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumId),
+        response);
+  }
+
+  private BaseEntity createEntity(Supplier<? extends BaseEntity> creator,
+      HttpServletResponse response) {
     try {
-      ForumEntity createdForum = persistence.createForum(forum);
+      BaseEntity createdMessage = creator.get();
       response.setStatus(HttpServletResponse.SC_CREATED);
       response.flushBuffer();
-      return createdForum;
+      return createdMessage;
     } catch (Exception exc) {
-      logger.error("CREATE FAILED", exc);
-      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, "create failed"));
+      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, exc.getMessage()));
       Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();
       throw new WebApplicationException(error);
     }
   }
-
-  @DELETE @Path("/{id}") @Produces(MediaType.APPLICATION_JSON) public void deleteForum() {
-
-  }
-
 }
