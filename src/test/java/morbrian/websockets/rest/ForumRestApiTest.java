@@ -9,6 +9,7 @@ import morbrian.websockets.model.ForumEntity;
 import morbrian.websockets.model.ForumEntityTest;
 import morbrian.websockets.model.MessageEntity;
 import morbrian.websockets.model.MessageEntityTest;
+import morbrian.websockets.persistence.RepositoryTest;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.either;
@@ -71,7 +71,7 @@ import static org.junit.Assert.*;
   @After public void teardown() {
     client = null;
     credentials = null;
-    for (ForumEntity forum : controller.forumList()) {
+    for (ForumEntity forum : controller.listForums()) {
       controller.deleteForum(forum.getId());
     }
   }
@@ -94,7 +94,7 @@ import static org.junit.Assert.*;
     for (int i = 0; i < SAMPLE_DATA_COUNT; i++) {
       expectedList.add(controller.createForum(ForumEntityTest.createRandomNewForum()));
     }
-    expectedList.sort(Comparator.comparing(ForumEntity::getCreatedTime));
+    expectedList.sort(RepositoryTest.RESULT_SORTING_COMPARATOR);
 
     // test
     Response response = client.get(Arrays.asList(FORUM_BASE_PATH), null);

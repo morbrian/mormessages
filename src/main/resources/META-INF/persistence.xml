@@ -7,7 +7,7 @@
   <persistence-unit name="primary">
     <!-- this specifies the implementation of the JPA specification, TomEE provides OpenJPA -->
     <!--<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>-->
-    <!--<provider>org.hibernate.ejb.HibernatePersistence</provider>-->
+    <!--<provider>org.hibernate.ejb.HibernatePersistenceProvider</provider>-->
     <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
     <class>morbrian.websockets.model.ForumEntity</class>
     <properties>

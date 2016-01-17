@@ -20,6 +20,8 @@ import java.util.Calendar;
   @Column(name = "modified_by_uid", length = 255, nullable = false) private String modifiedByUid;
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 
+  @Column(name = "uuid", nullable = false, unique = true) private String uuid;
+
   public Long getId() {
     return id;
   }
@@ -60,4 +62,11 @@ import java.util.Calendar;
     this.modifiedByUid = modifiedByUid;
   }
 
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 }

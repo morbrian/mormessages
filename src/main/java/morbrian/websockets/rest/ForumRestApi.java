@@ -6,6 +6,7 @@ import morbrian.websockets.model.BaseResponse;
 import morbrian.websockets.model.ForumEntity;
 import morbrian.websockets.model.MessageEntity;
 import morbrian.websockets.model.Status;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -28,10 +29,13 @@ import java.util.function.Supplier;
 
 @Path("/forum") @RequestScoped public class ForumRestApi {
 
+  @Inject private Logger logger;
   @Inject private Controller controller;
 
-  @GET @Path("/") @Produces(MediaType.APPLICATION_JSON) public List<ForumEntity> forumList() {
-    return controller.forumList();
+  @GET @Path("/") @Produces(MediaType.APPLICATION_JSON)
+  public List<ForumEntity> listForums(@QueryParam("offset") Integer offset,
+      @QueryParam("resultSize") Integer resultSize) {
+    return controller.listForums(offset, resultSize);
   }
 
   @GET @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
@@ -53,6 +57,20 @@ import java.util.function.Supplier;
   @PUT @Path("/") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
   public ForumEntity createForum(ForumEntity forum, @Context final HttpServletResponse response)
       throws Exception {
+    // fail for title conflict
+    if (controller.titleExists(forum.getTitle())) {
+      BaseResponse base = new BaseResponse(
+          new Status(Status.Type.ERROR, "forum already exists for title " + forum.getTitle()));
+      Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
+      throw new WebApplicationException(error);
+    }
+    // fail for id already set
+    if (forum.getId() != null) {
+      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
+          "cannot create forum with preset id(" + forum.getId() + "); try excluding id"));
+      Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
+      throw new WebApplicationException(error);
+    }
     return (ForumEntity) createEntity(() -> controller.createForum(forum), response);
   }
 
@@ -62,13 +80,9 @@ import java.util.function.Supplier;
   }
 
   @GET @Path("/{id}/message") @Produces(MediaType.APPLICATION_JSON)
-  public List<MessageEntity> messageList(@PathParam("id") Long forumId,
-      @QueryParam("lessThanId") Long lowId, @QueryParam("greaterThanId") Long highId) {
-    if (lowId != null || highId != null) {
-      return controller.messageListFilteredById(forumId, lowId, highId);
-    } else {
-      return controller.messageList(forumId);
-    }
+  public List<MessageEntity> listMessages(@PathParam("id") Long forumId,
+      @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize) {
+    return controller.listMessagesInForum(forumId, offset, resultSize);
   }
 
   @PUT @Path("/{id}/message") @Consumes(MediaType.APPLICATION_JSON)

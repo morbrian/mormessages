@@ -86,7 +86,8 @@ import static org.junit.Assert.*;
     assertTrue("message createdByUid not empty", !createdMessage.getCreatedByUid().isEmpty());
   }
 
-  @Test public void shouldThrowExceptionOnConstraintViolation() throws JsonProcessingException {
+  @Test public void shouldThrowExceptionWhenMessageCreatedForNonexistentForumId()
+      throws JsonProcessingException {
     MessageEntity expectedMessage = MessageEntityTest.createRandomNewMessage(999999l);
     exception.expect(PersistenceException.class);
     persistence.createMessage(expectedMessage);

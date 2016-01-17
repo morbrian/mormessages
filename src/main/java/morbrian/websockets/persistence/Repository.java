@@ -11,13 +11,25 @@ import javax.persistence.NoResultException;
 import java.util.List;
 
 @ApplicationScoped public class Repository {
+
+  public static final int DEFAULT_QUERY_OFFSET = 0;
+
+  public static final int DEFAULT_RESULT_SIZE = 100;
+
   @Inject private transient Logger logger;
 
   @Inject private EntityManager em;
 
-  public List<ForumEntity> findAllForumsOrderedByCreatedTime() {
+  public List<ForumEntity> listForums() {
     //noinspection unchecked
-    return em.createNamedQuery(ForumEntity.FIND_ALL_ORDERED_BY_CREATED_TIME).getResultList();
+    return listForums(DEFAULT_QUERY_OFFSET, DEFAULT_RESULT_SIZE);
+  }
+
+  public List<ForumEntity> listForums(Integer offset, Integer resultSize) {
+    //noinspection unchecked
+    return em.createNamedQuery(ForumEntity.FIND_ALL)
+        .setFirstResult((offset != null) ? offset : DEFAULT_QUERY_OFFSET)
+        .setMaxResults((resultSize != null) ? resultSize : DEFAULT_RESULT_SIZE).getResultList();
   }
 
   public ForumEntity findForumById(Long id) throws NoResultException {
@@ -25,19 +37,20 @@ import java.util.List;
         .getSingleResult();
   }
 
-  public List<MessageEntity> findMessagesForForumOrderedByCreatedTime(Long forumId) {
-    //noinspection unchecked
-    return em.createNamedQuery(MessageEntity.FIND_IN_FORUM_ORDERED_BY_CREATED_TIME)
-        .setParameter("forumId", forumId).getResultList();
+  public ForumEntity findForumByTitle(String title) throws NoResultException {
+    return (ForumEntity) em.createNamedQuery(ForumEntity.FIND_ONE_BY_TITLE)
+        .setParameter("title", title).getSingleResult();
   }
 
-  public List<MessageEntity> findMessagesForForumWithIdRangeOrderedByCreatedTime(Long forumId,
-      Long lowId, Long highId) {
+  public List<MessageEntity> listMessagesInForum(Long forumId) {
+    return listMessagesInForum(forumId, DEFAULT_QUERY_OFFSET, DEFAULT_RESULT_SIZE);
+  }
+
+  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize) {
     //noinspection unchecked
-    return em.createNamedQuery(
-        MessageEntity.FIND_IN_FORUM_WITH_ID_RANGE_EXCLUSIVE_ORDERED_BY_CREATED_TIME)
-        .setParameter("forumId", forumId).setParameter("lowId", lowId)
-        .setParameter("highId", highId).getResultList();
+    return em.createNamedQuery(MessageEntity.FIND_ALL_IN_FORUM).setParameter("forumId", forumId)
+        .setFirstResult((offset != null) ? offset : DEFAULT_QUERY_OFFSET)
+        .setMaxResults((resultSize != null) ? resultSize : DEFAULT_RESULT_SIZE).getResultList();
   }
 
   public MessageEntity findMessageById(Long id) throws NoResultException {

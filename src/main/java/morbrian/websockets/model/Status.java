@@ -47,6 +47,7 @@ public class Status {
   public enum Type {
     SUCCESS("success"), UNSPECIFIED("unspecified"), ERROR("error"), UNAUTHORIZED("unauthorized");
     private final String value;
+
     Type(String value) {
       this.value = value;
     }

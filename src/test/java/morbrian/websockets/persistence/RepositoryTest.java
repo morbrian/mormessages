@@ -3,6 +3,7 @@ package morbrian.websockets.persistence;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
+import morbrian.websockets.model.BaseEntity;
 import morbrian.websockets.model.ForumEntity;
 import morbrian.websockets.model.ForumEntityTest;
 import morbrian.websockets.model.MessageEntity;
@@ -22,11 +23,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(Arquillian.class) public class RepositoryTest {
+
+  public static final Comparator RESULT_SORTING_COMPARATOR =
+      Comparator.comparing(BaseEntity::getId);
 
   private static final int FORUM_COUNT = 5;
   private static final int MESSAGE_COUNT = 10;
@@ -84,8 +88,8 @@ import static org.junit.Assert.*;
 
   @Test public void shouldFindAllForumsOrderedByCreatedTime() throws JsonProcessingException {
     List<ForumEntity> sortedForums = new ArrayList<>(forums.values());
-    sortedForums.sort(Comparator.comparing(ForumEntity::getCreatedTime));
-    List<ForumEntity> forumList = repository.findAllForumsOrderedByCreatedTime();
+    sortedForums.sort(RESULT_SORTING_COMPARATOR);
+    List<ForumEntity> forumList = repository.listForums();
     assertEquals("equal list sizes", sortedForums.size(), forumList.size());
     for (int i = 0; i < sortedForums.size(); i++) {
       ForumEntityTest
@@ -96,9 +100,8 @@ import static org.junit.Assert.*;
   @Test public void shouldFindMessagesForForum() throws JsonProcessingException {
     for (ForumEntity forum : forums.values()) {
       List<MessageEntity> expectedMessages = forumMessages.get(forum.getId());
-      expectedMessages.sort(Comparator.comparing(MessageEntity::getCreatedTime));
-      List<MessageEntity> foundMessages =
-          repository.findMessagesForForumOrderedByCreatedTime(forum.getId());
+      expectedMessages.sort(RESULT_SORTING_COMPARATOR);
+      List<MessageEntity> foundMessages = repository.listMessagesInForum(forum.getId());
       assertEquals("message count", expectedMessages.size(), foundMessages.size());
       for (int i = 0; i < expectedMessages.size(); i++) {
         MessageEntityTest.verifyEqualityOfAllAttributes("messages", expectedMessages.get(i),
@@ -118,26 +121,4 @@ import static org.junit.Assert.*;
     }
   }
 
-  @Test public void shouldFindMessagesWithRangeExclusive() {
-    assertTrue("pre-test condition", MESSAGE_COUNT >= 10);
-    Long forumId = new ArrayList<>(forums.keySet()).get(0);
-    List<MessageEntity> messages = forumMessages.get(forumId);
-    List<Long> messageIds =
-        messages.stream().map(MessageEntity::getId).collect(Collectors.toList());
-
-    int offset = 3;
-    int expectedCount = offset * 2 - 1;
-    int lowIndex = offset;
-    int highIndex = messageIds.size() - offset;
-    Long lowId = messageIds.get(lowIndex);
-    Long highId = messageIds.get(highIndex);
-
-    List<MessageEntity> foundMessages =
-        repository.findMessagesForForumWithIdRangeOrderedByCreatedTime(forumId, lowId, highId);
-    assertEquals("found message count", expectedCount, foundMessages.size());
-    List<MessageEntity> verifiedMessages =
-        messages.stream().filter(m -> m.getId() < lowId || m.getId() > highId)
-            .collect(Collectors.toList());
-    assertEquals("verified count", foundMessages.size(), verifiedMessages.size());
-  }
 }

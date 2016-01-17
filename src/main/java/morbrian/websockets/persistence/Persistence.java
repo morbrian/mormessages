@@ -16,6 +16,9 @@ import java.security.Principal;
   @Inject private EntityManager em;
 
   public BaseEntity createEntity(BaseEntity entity) {
+    assert entity != null : "entity to create must not be null";
+    assert principal != null : "injected principal must not be null";
+
     entity.setCreatedByUid(principal.getName());
     entity.setModifiedByUid(principal.getName());
     em.persist(entity);
@@ -23,11 +26,15 @@ import java.security.Principal;
   }
 
   public BaseEntity updateEntity(BaseEntity entity) {
+    assert entity != null : "entity to update must not be null";
+    assert principal != null : "injected principal must not be null";
+
     entity.setModifiedByUid(principal.getName());
     return em.merge(entity);
   }
 
   public void removeEntity(BaseEntity entity) {
+    assert entity != null : "entity to remove must not be null";
     em.remove(em.find(entity.getClass(), entity.getId()));
   }
 

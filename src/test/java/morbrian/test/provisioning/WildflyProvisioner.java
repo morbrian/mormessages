@@ -18,7 +18,7 @@ public class WildflyProvisioner implements VendorSpecificProvisioner {
     String[] args =
         {"-sc", standaloneConf, "-up", userProps, "-gp", groupProps, "-a", "-g", "user", "-u",
             configProvider.getUsername(), "-p", configProvider.getPassword(), "-s"
-            // this means silent, comment out to see console output
+            // -s means silent, remove to see AddUser console output
         };
     try {
       AddUser.main(args);

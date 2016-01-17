@@ -40,7 +40,6 @@ public class MessageEntityTest {
     MessageEntity sourceMessage = createRandomNewMessage(1l);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writer().writeValueAsString(sourceMessage);
-    System.out.println("MESSAGE: " + json);
     MessageEntity targetMessage = mapper.reader().forType(MessageEntity.class).readValue(json);
 
     verifyEqualityOfAllAttributes("message-response", sourceMessage, targetMessage);

@@ -3,6 +3,7 @@ package morbrian.websockets.model;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class BaseEntityListener {
 
@@ -23,6 +24,9 @@ public class BaseEntityListener {
     //    if (principal != null) {
     //      System.out.println("PRINCIPAL IS NOT NULL IN THE BASE_ENTTITY_LISTENER");
     //    }
+    if (entity.getUuid() == null || entity.getUuid().isEmpty()) {
+      entity.setUuid(UUID.randomUUID().toString());
+    }
     Calendar now = Calendar.getInstance();
     entity.setCreatedTime(now);
     entity.setModifiedTime(now);

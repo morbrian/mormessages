@@ -7,9 +7,13 @@ import java.util.List;
 
 public interface Controller {
 
-  List<ForumEntity> forumList();
+  List<ForumEntity> listForums();
+
+  List<ForumEntity> listForums(Integer offset, Integer resultSize);
 
   ForumEntity getForumById(Long forumId);
+
+  boolean titleExists(String title);
 
   ForumEntity modifyForum(ForumEntity forum);
 
@@ -19,10 +23,9 @@ public interface Controller {
 
   MessageEntity getMessageById(Long messageId);
 
-  List<MessageEntity> messageList(Long forumId);
+  List<MessageEntity> listMessagesInForum(Long forumId);
 
-  // TODO: look into options for mapping http queries to generic filter, but all we need right now is this one anyway
-  List<MessageEntity> messageListFilteredById(Long forumId, Long lowId, Long highId);
+  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize);
 
   MessageEntity postMessageToForum(MessageEntity message, Long forumId);
 
