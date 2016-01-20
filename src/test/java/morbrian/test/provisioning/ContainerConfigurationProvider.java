@@ -65,7 +65,7 @@ public class ContainerConfigurationProvider {
   }
 
   public Archive<?> createDeployment() {
-    return ShrinkWrap.create(JavaArchive.class).addPackages(true, "morbrian.websockets")
+    return ShrinkWrap.create(JavaArchive.class).addPackages(true, "morbrian.mormessages")
         .addPackages(true, "morbrian.test")
         .addAsResource("test-persistence.xml", "META-INF/persistence.xml")
         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");

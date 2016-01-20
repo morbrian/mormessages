@@ -9,7 +9,6 @@
     <!--<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>-->
     <!--<provider>org.hibernate.ejb.HibernatePersistenceProvider</provider>-->
     <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
-    <class>morbrian.websockets.model.ForumEntity</class>
     <properties>
       <!-- uncommenting these properties will update the schema in the database, useful primarily for development -->
       <!-- these two are for the openjpa implementation native to TomEE -->
