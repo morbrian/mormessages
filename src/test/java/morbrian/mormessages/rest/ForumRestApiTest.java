@@ -1,5 +1,6 @@
 package morbrian.mormessages.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
@@ -30,9 +31,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -42,6 +41,7 @@ import static org.junit.Assert.*;
 @RunWith(Arquillian.class) public class ForumRestApiTest {
 
   private static final int SAMPLE_DATA_COUNT = 10;
+  private static final int LARGE_DATA_COUNT = 50;
   private static final ContainerConfigurationProvider configProvider =
       new ContainerConfigurationProvider();
   private static final String AUTH_BASE_PATH = "api/rest/auth/";
@@ -78,7 +78,7 @@ import static org.junit.Assert.*;
 
   @Test public void shouldReturnEmptyList() throws IOException {
     //test
-    Response response = client.get(Arrays.asList(FORUM_BASE_PATH), null);
+    Response response = client.get(Collections.singletonList(FORUM_BASE_PATH), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     List<ForumEntity> forumList = response.readEntity(new GenericType<List<ForumEntity>>() {
     });
@@ -97,7 +97,7 @@ import static org.junit.Assert.*;
     expectedList.sort(RepositoryTest.RESULT_SORTING_COMPARATOR);
 
     // test
-    Response response = client.get(Arrays.asList(FORUM_BASE_PATH), null);
+    Response response = client.get(Collections.singletonList(FORUM_BASE_PATH), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     List<ForumEntity> resultList = response.readEntity(new GenericType<List<ForumEntity>>() {
     });
@@ -128,7 +128,7 @@ import static org.junit.Assert.*;
   @Test public void shouldCreateNewForum() throws IOException {
     // test
     ForumEntity submittedForum = ForumEntityTest.createRandomNewForum();
-    Response response = client.put(submittedForum, Arrays.asList(FORUM_BASE_PATH), null);
+    Response response = client.put(submittedForum, Collections.singletonList(FORUM_BASE_PATH), null);
     assertEquals("response", Response.Status.CREATED.getStatusCode(), response.getStatus());
     // even thouh readEntity works for other tests, it does not work here and I cannot figure out why.
     // trying it results in the following error:
@@ -240,12 +240,7 @@ import static org.junit.Assert.*;
   @Test public void shouldReturnMessageList() {
     // sample data
     ForumEntity forum = controller.createForum(ForumEntityTest.createRandomNewForum());
-    List<MessageEntity> sampleMessages = new ArrayList<>();
-    for (int i = 0; i < SAMPLE_DATA_COUNT; i++) {
-      sampleMessages.add(controller
-          .postMessageToForum(MessageEntityTest.createRandomNewMessage(forum.getId()),
-              forum.getId()));
-    }
+    List<MessageEntity> sampleMessages = postRandomMessagesToServerInForum(forum.getId(), SAMPLE_DATA_COUNT);
 
     // test
     Response response = client.get(Arrays.asList(FORUM_BASE_PATH, forum.getId(), "message"), null);
@@ -258,6 +253,46 @@ import static org.junit.Assert.*;
     // verify
     assertEquals("message count", sampleMessages.size(), responseMessages.size());
   }
+
+  @Test public void shouldReturnMessageListConstrainedByLimitAndOffset()
+      throws JsonProcessingException {
+    // sample data
+    ForumEntity forum = controller.createForum(ForumEntityTest.createRandomNewForum());
+    List<MessageEntity> expectedList = postRandomMessagesToServerInForum(forum.getId(), LARGE_DATA_COUNT);
+
+    // test
+    int resultSize = 5;
+    Map<String, Object> params = new HashMap<>();
+    params.put("resultSize", resultSize);
+    // request (resultSize) messages per request until all are fetched
+    List<MessageEntity> resultList = new ArrayList<>();
+    for (int i = 0; i < LARGE_DATA_COUNT / resultSize; i++) {
+      params.put("offset", resultSize * i);
+      Response response = client.get(Arrays.asList(FORUM_BASE_PATH, forum.getId(), "message"), params);
+      assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
+      List<MessageEntity> responseMessages = response.readEntity(new GenericType<List<MessageEntity>>() {
+      });
+      response.close();
+      assertEquals("message count", resultSize, responseMessages.size());
+      resultList.addAll(responseMessages);
+    }
+    assertEquals("collected messages", expectedList.size(), resultList.size());
+    for (int i = 0; i < expectedList.size(); i++) {
+      MessageEntityTest
+          .verifyEqualityOfAllAttributes("item-" + i, expectedList.get(i), resultList.get(i));
+    }
+  }
+
+  private List<MessageEntity> postRandomMessagesToServerInForum(Long forumId, int count) {
+    List<MessageEntity> sampleMessages = new ArrayList<>();
+    for (int i = 0; i < LARGE_DATA_COUNT; i++) {
+      sampleMessages.add(controller
+              .postMessageToForum(MessageEntityTest.createRandomNewMessage(forumId),
+                      forumId));
+    }
+    return sampleMessages;
+  }
+
 
   @Test public void shouldSubscribeToForum() {
     fail("not implemented");

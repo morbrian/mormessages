@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 
 @RunWith(Arquillian.class) public class RepositoryTest {
 
-  public static final Comparator RESULT_SORTING_COMPARATOR =
+  public static final Comparator<? super BaseEntity> RESULT_SORTING_COMPARATOR =
       Comparator.comparing(BaseEntity::getId);
 
   private static final int FORUM_COUNT = 5;
