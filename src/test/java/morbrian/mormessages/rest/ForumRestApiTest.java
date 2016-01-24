@@ -290,6 +290,7 @@ import static org.junit.Assert.*;
               .postMessageToForum(MessageEntityTest.createRandomNewMessage(forumId),
                       forumId));
     }
+    sampleMessages.sort(RepositoryTest.RESULT_SORTING_COMPARATOR);
     return sampleMessages;
   }
 

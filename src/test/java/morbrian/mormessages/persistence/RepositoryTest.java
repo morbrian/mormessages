@@ -30,7 +30,7 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(Arquillian.class) public class RepositoryTest {
 
   public static final Comparator<? super BaseEntity> RESULT_SORTING_COMPARATOR =
-      Comparator.comparing(BaseEntity::getId);
+      Comparator.comparing(BaseEntity::getId).reversed();
 
   private static final int FORUM_COUNT = 5;
   private static final int MESSAGE_COUNT = 10;
