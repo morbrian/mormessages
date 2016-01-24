@@ -12,12 +12,16 @@ import javax.persistence.Table;
 
 @NamedQueries({@NamedQuery(
     name = MessageEntity.FIND_ALL_IN_FORUM,
-    query = "SELECT e FROM MessageEntity e WHERE e.forumId = :forumId ORDER BY e.id"), @NamedQuery(
+    query = "SELECT e FROM MessageEntity e WHERE e.forumId = :forumId ORDER BY e.id DESC"), @NamedQuery(
+    name = MessageEntity.FIND_ALL_IN_FORUM_WHERE_ID_GREATER_THAN,
+    query = "SELECT e FROM MessageEntity e WHERE e.forumId = :forumId AND e.id > :id ORDER BY e.id DESC"),@NamedQuery(
     name = MessageEntity.FIND_ONE_BY_ID,
     query = "SELECT e FROM MessageEntity e WHERE e.id = :id")}) @Entity @Table(name = "message")
 @Dependent public class MessageEntity extends BaseEntity {
 
   public static final String FIND_ALL_IN_FORUM = "MessageEntity.findAllInForum";
+
+  public static final String FIND_ALL_IN_FORUM_WHERE_ID_GREATER_THAN = "MessageEntity.findAllInForumWhereIdGreaterThan";
 
   public static final String FIND_ONE_BY_ID = "MessageEntity.findOneById";
 

@@ -34,8 +34,8 @@ import java.util.function.Supplier;
 
   @GET @Path("/") @Produces(MediaType.APPLICATION_JSON)
   public List<ForumEntity> listForums(@QueryParam("offset") Integer offset,
-      @QueryParam("resultSize") Integer resultSize) {
-    return controller.listForums(offset, resultSize);
+      @QueryParam("resultSize") Integer resultSize, @QueryParam("greaterThan") Long greaterThan) {
+    return controller.listForums(offset, resultSize, greaterThan);
   }
 
   @GET @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
@@ -81,8 +81,9 @@ import java.util.function.Supplier;
 
   @GET @Path("/{id}/message") @Produces(MediaType.APPLICATION_JSON)
   public List<MessageEntity> listMessages(@PathParam("id") Long forumId,
-      @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize) {
-    return controller.listMessagesInForum(forumId, offset, resultSize);
+      @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize,
+      @QueryParam("greaterThan") Long greaterThan) {
+    return controller.listMessagesInForum(forumId, offset, resultSize, greaterThan);
   }
 
   @PUT @Path("/{id}/message") @Consumes(MediaType.APPLICATION_JSON)

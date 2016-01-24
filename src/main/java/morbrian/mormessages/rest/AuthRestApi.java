@@ -38,6 +38,7 @@ import java.security.Principal;
     if (credentials == null) {
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR, "missing credentials"));
       Response error = Response.status(Response.Status.BAD_REQUEST).entity(base).build();
+      logger.error("received null credentials");
       throw new WebApplicationException(error);
     }
     return login(credentials.getUsername(), credentials.getPassword());
@@ -76,8 +77,10 @@ import java.security.Principal;
         request.logout();
       }
       request.login(username, password);
+      logger.info("user " + username + " login successful");
       return new BaseResponse(new Status(Status.Type.SUCCESS, username));
     } catch (ServletException e) {
+      logger.info("user " + username + " login attempt failed");
       throw failedLogin(username);
     }
   }

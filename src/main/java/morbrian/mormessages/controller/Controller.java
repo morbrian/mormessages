@@ -9,7 +9,7 @@ public interface Controller {
 
   List<ForumEntity> listForums();
 
-  List<ForumEntity> listForums(Integer offset, Integer resultSize);
+  List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan);
 
   ForumEntity getForumById(Long forumId);
 
@@ -25,7 +25,7 @@ public interface Controller {
 
   List<MessageEntity> listMessagesInForum(Long forumId);
 
-  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize);
+  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize, Long greaterThan);
 
   MessageEntity postMessageToForum(MessageEntity message, Long forumId);
 

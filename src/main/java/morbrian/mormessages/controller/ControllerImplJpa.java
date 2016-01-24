@@ -23,8 +23,8 @@ import java.util.List;
     return repository.listForums();
   }
 
-  @Override public List<ForumEntity> listForums(Integer offset, Integer resultSize) {
-    return repository.listForums(offset, resultSize);
+  @Override public List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan) {
+    return repository.listForums(offset, resultSize, greaterThan);
   }
 
   @Override public ForumEntity getForumById(Long forumId) {
@@ -65,8 +65,8 @@ import java.util.List;
   }
 
   @Override
-  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSet) {
-    return repository.listMessagesInForum(forumId, offset, resultSet);
+  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize, Long greaterThan) {
+    return repository.listMessagesInForum(forumId, offset, resultSize, greaterThan);
   }
 
   @Override public MessageEntity postMessageToForum(MessageEntity message, Long forumId) {

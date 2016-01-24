@@ -48,7 +48,7 @@ public class ForumEntityTest {
 
   @Test public void shouldDeserializeFromString() throws Exception {
     String sampleData =
-        "{\"title\":\"a3eb0997aadb74a4f48abf7ba2ae842b8a7c7\",\"description\":\"aa5496740af464a42d6a8a12a730b234d9251\",\"imageUrl\":\"a834f1cb7afb9fa4855a85f7ab7500e5b342a\",\"createdTime\":null,\"modifiedTime\":null,\"createdByUid\":\"MOR\",\"modifiedByUid\":\"BRIAN\",\"id\":null}";
+        "{\"title\":\"a3eb0997aadb74a4f48abf7ba2ae842b8a7c7\",\"description\":\"aa5496740af464a42d6a8a12a730b234d9251\",\"imageUrl\":\"a834f1cb7afb9fa4855a85f7ab7500e5b342a\",\"createdTime\":null,\"modifiedTime\":null,\"createdByUid\":\"MOR\",\"modifiedByUid\":\"BRIAN\",\"id\":null,\"uuid\":null}";
     ObjectMapper mapper = new ObjectMapper();
     ForumEntity targetForum = mapper.reader().forType(ForumEntity.class).readValue(sampleData);
     assertEquals("string equality", sampleData, mapper.writeValueAsString(targetForum));
