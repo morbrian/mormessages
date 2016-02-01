@@ -1,5 +1,7 @@
 package morbrian.mormessages.model;
 
+import java.util.Objects;
+
 public class Credentials {
 
   private String username;
@@ -21,13 +23,21 @@ public class Credentials {
     return password;
   }
 
-  @Override public boolean equals(Object other) {
-    if (other == null || this.getClass() != other.getClass()) {
-      return false;
-    }
+  public String userInfo() {
+    return username + ":" + password;
+  }
 
-    Credentials otherBase = (Credentials) other;
-    return (username == null ? otherBase.username == null : username.equals(otherBase.username))
-        && (password == null ? otherBase.password == null : password.equals(otherBase.password));
+  @Override public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    Credentials that = (Credentials) o;
+    return Objects.equals(getUsername(), that.getUsername()) && Objects
+        .equals(getPassword(), that.getPassword());
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash(getUsername(), getPassword());
   }
 }

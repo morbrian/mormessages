@@ -21,7 +21,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.security.Principal;
 
-@ServerEndpoint(value = "/api/websockets/forum/{forumId}", encoders = {
+@ServerEndpoint(value = "/api/websocket/forum/{forumId}", encoders = {
     MessageEntityEncoder.class}, decoders = {MessageEntityDecoder.class})
 public class ForumSocketEndpoint {
 
@@ -37,10 +37,12 @@ public class ForumSocketEndpoint {
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.info(
         "New websocket session opened: " + wrapForLogging(userIdentity, forumId, session.getId()));
-    if (userIdentity != null) {
-      Subscription subscription = new Subscription(session, userIdentity, forumId);
-      subscriptionEventSrc.select(Opened.SELECTOR).fire(subscription);
+    if (userIdentity == null) {
+      // TODO: we don't want unauthenticated users subscribing
+      logger.warn("Opening session(" + session.getId() + ") for null userIdentity");
     }
+    Subscription subscription = new Subscription(session, userIdentity, forumId);
+    subscriptionEventSrc.select(Opened.SELECTOR).fire(subscription);
   }
 
   @OnClose public void onClose(Session session, @PathParam("forumId") Long forumId) {
@@ -48,10 +50,12 @@ public class ForumSocketEndpoint {
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.info(
         "Websocket session closed: " + wrapForLogging(userIdentity, forumId, session.getId()));
-    if (userIdentity != null) {
-      Subscription subscription = new Subscription(session, userIdentity, forumId);
-      subscriptionEventSrc.select(Closed.SELECTOR).fire(subscription);
+    if (userIdentity == null) {
+      logger.warn("Closing session(" + session.getId() + ") for null userIdentity");
     }
+    Subscription subscription = new Subscription(session, userIdentity, forumId);
+    subscriptionEventSrc.select(Closed.SELECTOR).fire(subscription);
+
   }
 
   @OnMessage

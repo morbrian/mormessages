@@ -1,6 +1,5 @@
 package morbrian.mormessages.websocket;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.Controller;
 import morbrian.mormessages.controller.SubscriptionManager;
@@ -46,13 +45,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Arquillian.class) public class ForumSocketEndpointTest {
-  private static final int SAMPLE_DATA_COUNT = 10;
-  private static final int LARGE_DATA_COUNT = 50;
   private static final ContainerConfigurationProvider configProvider =
       new ContainerConfigurationProvider();
   private static final String AUTH_REST_PATH = "api/rest/auth/";
-  private static final String FORUM_REST_PATH = "api/rest/forum/";
-  private static final String FORUM_SOCKET_PATH = "api/websockets/forum";
+  private static final String FORUM_SOCKET_PATH = "api/websocket/forum";
   private static Logger logger = LoggerFactory.getLogger(ForumRestApi.class);
   // static data holders for testing messages
   private static MessageEntity receivedMessageClient1;
