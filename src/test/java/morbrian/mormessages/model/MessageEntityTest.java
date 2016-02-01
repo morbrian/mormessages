@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MessageEntityTest {
 
@@ -19,6 +20,11 @@ public class MessageEntityTest {
   public static void verifyEqualityOfAllAttributes(String tag, MessageEntity expectedMessage,
       MessageEntity message) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
+
+    // neither the expecte nor the test data should be null for this verification
+    assertNotNull(expectedMessage);
+    assertNotNull(message);
+
     assertEquals(tag + " message.id", expectedMessage.getId(), message.getId());
     assertEquals(tag + " message.getCreatedByUid", expectedMessage.getCreatedByUid(),
         message.getCreatedByUid());
@@ -37,7 +43,7 @@ public class MessageEntityTest {
   }
 
   @Test public void shouldSerializeAndDeserialize() throws IOException {
-    MessageEntity sourceMessage = createRandomNewMessage(1l);
+    MessageEntity sourceMessage = createRandomNewMessage(1L);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writer().writeValueAsString(sourceMessage);
     MessageEntity targetMessage = mapper.reader().forType(MessageEntity.class).readValue(json);

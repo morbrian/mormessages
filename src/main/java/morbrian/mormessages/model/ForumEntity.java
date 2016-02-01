@@ -24,7 +24,8 @@ import javax.validation.constraints.NotNull;
 
   public static final String FIND_ALL = "ForumEntity.findAll";
 
-  public static final String FIND_ALL_WHERE_ID_GREATER_THAN = "ForumEntity.findAllWhereIdGreaterThan";
+  public static final String FIND_ALL_WHERE_ID_GREATER_THAN =
+      "ForumEntity.findAllWhereIdGreaterThan";
 
   public static final String FIND_ONE_BY_ID = "ForumEntity.findOneById";
 

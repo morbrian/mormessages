@@ -1,13 +1,13 @@
 package morbrian.mormessages.persistence;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import morbrian.test.provisioning.ContainerConfigurationProvider;
-import morbrian.test.provisioning.VendorSpecificProvisioner;
 import morbrian.mormessages.model.BaseEntity;
 import morbrian.mormessages.model.ForumEntity;
 import morbrian.mormessages.model.ForumEntityTest;
 import morbrian.mormessages.model.MessageEntity;
 import morbrian.mormessages.model.MessageEntityTest;
+import morbrian.test.provisioning.ContainerConfigurationProvider;
+import morbrian.test.provisioning.VendorSpecificProvisioner;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
