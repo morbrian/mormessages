@@ -16,7 +16,7 @@ import java.util.List;
 
   public static final int DEFAULT_RESULT_SIZE = 100;
 
-  public static final Long DEFAULT_QUERY_GREATER_THAN = 0l;
+  public static final Long DEFAULT_QUERY_GREATER_THAN = 0L;
 
   @Inject private transient Logger logger;
 
@@ -46,10 +46,12 @@ import java.util.List;
   }
 
   public List<MessageEntity> listMessagesInForum(Long forumId) {
-    return listMessagesInForum(forumId, DEFAULT_QUERY_OFFSET, DEFAULT_RESULT_SIZE, DEFAULT_QUERY_GREATER_THAN);
+    return listMessagesInForum(forumId, DEFAULT_QUERY_OFFSET, DEFAULT_RESULT_SIZE,
+        DEFAULT_QUERY_GREATER_THAN);
   }
 
-  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize, Long greaterThan) {
+  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize,
+      Long greaterThan) {
     //noinspection unchecked
     return em.createNamedQuery(MessageEntity.FIND_ALL_IN_FORUM).setParameter("forumId", forumId)
         .setFirstResult((offset != null) ? offset : DEFAULT_QUERY_OFFSET)

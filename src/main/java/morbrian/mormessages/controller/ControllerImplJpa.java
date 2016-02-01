@@ -1,5 +1,6 @@
 package morbrian.mormessages.controller;
 
+import morbrian.mormessages.event.Created;
 import morbrian.mormessages.model.ForumEntity;
 import morbrian.mormessages.model.MessageEntity;
 import morbrian.mormessages.persistence.Persistence;
@@ -7,6 +8,7 @@ import morbrian.mormessages.persistence.Repository;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import java.security.Principal;
@@ -17,13 +19,15 @@ import java.util.List;
   @Inject private Persistence persistence;
   @Inject private Repository repository;
   @Inject private Principal principal;
+  @Inject private Event<MessageEntity> messageEventSrc;
   @Inject private Logger logger;
 
   @Override public List<ForumEntity> listForums() {
     return repository.listForums();
   }
 
-  @Override public List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan) {
+  @Override
+  public List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan) {
     return repository.listForums(offset, resultSize, greaterThan);
   }
 
@@ -65,12 +69,16 @@ import java.util.List;
   }
 
   @Override
-  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize, Long greaterThan) {
+  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize,
+      Long greaterThan) {
     return repository.listMessagesInForum(forumId, offset, resultSize, greaterThan);
   }
 
   @Override public MessageEntity postMessageToForum(MessageEntity message, Long forumId) {
     message.setForumId(forumId);
-    return persistence.createMessage(message);
+    MessageEntity createdMessage = persistence.createMessage(message);
+    messageEventSrc.select(Created.SELECTOR).fire(createdMessage);
+    return createdMessage;
   }
+
 }

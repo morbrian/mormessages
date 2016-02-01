@@ -25,7 +25,8 @@ public interface Controller {
 
   List<MessageEntity> listMessagesInForum(Long forumId);
 
-  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize, Long greaterThan);
+  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize,
+      Long greaterThan);
 
   MessageEntity postMessageToForum(MessageEntity message, Long forumId);
 

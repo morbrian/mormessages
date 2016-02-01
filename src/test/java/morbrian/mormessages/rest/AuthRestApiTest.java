@@ -1,11 +1,11 @@
 package morbrian.mormessages.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import morbrian.test.provisioning.ContainerConfigurationProvider;
-import morbrian.test.provisioning.VendorSpecificProvisioner;
 import morbrian.mormessages.model.BaseResponse;
 import morbrian.mormessages.model.Credentials;
 import morbrian.mormessages.model.Status;
+import morbrian.test.provisioning.ContainerConfigurationProvider;
+import morbrian.test.provisioning.VendorSpecificProvisioner;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
