@@ -16,8 +16,8 @@ import javax.validation.constraints.NotNull;
     query = "SELECT e FROM ForumEntity e ORDER BY e.id DESC"), @NamedQuery(
     name = ForumEntity.FIND_ALL_WHERE_ID_GREATER_THAN,
     query = "SELECT e FROM ForumEntity e WHERE e.id > :id ORDER BY e.id DESC"), @NamedQuery(
-    name = ForumEntity.FIND_ONE_BY_ID,
-    query = "SELECT e FROM ForumEntity e WHERE e.id = :id"), @NamedQuery(
+    name = ForumEntity.FIND_ONE_BY_UUID,
+    query = "SELECT e FROM ForumEntity e WHERE e.uuid = :uuid"), @NamedQuery(
     name = ForumEntity.FIND_ONE_BY_TITLE,
     query = "SELECT e FROM ForumEntity e WHERE e.title = :title")}) @Entity @Table(name = "forum")
 @Dependent public class ForumEntity extends BaseEntity {
@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
   public static final String FIND_ALL_WHERE_ID_GREATER_THAN =
       "ForumEntity.findAllWhereIdGreaterThan";
 
-  public static final String FIND_ONE_BY_ID = "ForumEntity.findOneById";
+  public static final String FIND_ONE_BY_UUID = "ForumEntity.findOneByUuid";
 
   public static final String FIND_ONE_BY_TITLE = "ForumEntity.findOneByTitle";
 

@@ -38,14 +38,14 @@ import java.util.function.Supplier;
     return controller.listForums(offset, resultSize, greaterThan);
   }
 
-  @GET @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
-  public ForumEntity getForumById(@PathParam("id") Long forumId) {
-    return controller.getForumById(forumId);
+  @GET @Path("/{uuid}") @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity getForumByUuid(@PathParam("uuid") String forumUuid) {
+    return controller.getForumByUuid(forumUuid);
   }
 
-  @POST @Path("/{id}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-  public ForumEntity modifyForum(@PathParam("id") Long forumId, ForumEntity forum) {
-    if (!forumId.equals(forum.getId())) {
+  @POST @Path("/{uuid}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity modifyForum(@PathParam("uuid") String forumUuid, ForumEntity forum) {
+    if (!forumUuid.equals(forum.getUuid())) {
       BaseResponse base = new BaseResponse(
           new Status(Status.Type.ERROR, "url path forumId does not match posted forum.id"));
       Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();
@@ -64,6 +64,13 @@ import java.util.function.Supplier;
       Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
       throw new WebApplicationException(error);
     }
+    // fail for uuid conflict (such as when client incorrectly tries to re-use an already created uuid)
+    if (controller.uuidExists(forum.getUuid())) {
+      BaseResponse base = new BaseResponse(
+          new Status(Status.Type.ERROR, "forum already exists for uuid " + forum.getUuid()));
+      Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
+      throw new WebApplicationException(error);
+    }
     // fail for id already set
     if (forum.getId() != null) {
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
@@ -74,23 +81,23 @@ import java.util.function.Supplier;
     return (ForumEntity) createEntity(() -> controller.createForum(forum), response);
   }
 
-  @DELETE @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
-  public void deleteForum(@PathParam("id") Long forumId) {
-    controller.deleteForum(forumId);
+  @DELETE @Path("/{uuid}") @Produces(MediaType.APPLICATION_JSON)
+  public void deleteForum(@PathParam("uuid") String forumUuid) {
+    controller.deleteForum(forumUuid);
   }
 
-  @GET @Path("/{id}/message") @Produces(MediaType.APPLICATION_JSON)
-  public List<MessageEntity> listMessages(@PathParam("id") Long forumId,
+  @GET @Path("/{uuid}/message") @Produces(MediaType.APPLICATION_JSON)
+  public List<MessageEntity> listMessages(@PathParam("uuid") String forumUuid,
       @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize,
       @QueryParam("greaterThan") Long greaterThan) {
-    return controller.listMessagesInForum(forumId, offset, resultSize, greaterThan);
+    return controller.listMessagesInForum(forumUuid, offset, resultSize, greaterThan);
   }
 
-  @PUT @Path("/{id}/message") @Consumes(MediaType.APPLICATION_JSON)
+  @PUT @Path("/{uuid}/message") @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public MessageEntity postMessageToForum(MessageEntity message, @PathParam("id") Long forumId,
+  public MessageEntity postMessageToForum(MessageEntity message, @PathParam("uuid") String forumUuid,
       @Context final HttpServletResponse response) throws Exception {
-    return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumId),
+    return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumUuid),
         response);
   }
 

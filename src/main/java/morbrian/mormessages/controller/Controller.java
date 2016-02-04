@@ -11,23 +11,25 @@ public interface Controller {
 
   List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan);
 
-  ForumEntity getForumById(Long forumId);
+  ForumEntity getForumByUuid(String forumUuid);
 
   boolean titleExists(String title);
+
+  boolean uuidExists(String uuid);
 
   ForumEntity modifyForum(ForumEntity forum);
 
   ForumEntity createForum(ForumEntity forum);
 
-  void deleteForum(Long forumId);
+  void deleteForum(String forumUuid);
 
-  MessageEntity getMessageById(Long messageId);
+  MessageEntity getMessageByUuid(String messageUuid);
 
-  List<MessageEntity> listMessagesInForum(Long forumId);
+  List<MessageEntity> listMessagesInForum(String forumUuid);
 
-  List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize,
+  List<MessageEntity> listMessagesInForum(String forumUuid, Integer offset, Integer resultSize,
       Long greaterThan);
 
-  MessageEntity postMessageToForum(MessageEntity message, Long forumId);
+  MessageEntity postMessageToForum(MessageEntity message, String forumUuid);
 
 }

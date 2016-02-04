@@ -6,15 +6,16 @@ import morbrian.test.provisioning.ContainerConfigurationProvider;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class MessageEntityTest {
 
-  public static MessageEntity createRandomNewMessage(Long forumId) {
+  public static MessageEntity createRandomNewMessage(String forumUuid) {
     return new MessageEntity(ContainerConfigurationProvider.randomAlphaNumericString(),
-        ContainerConfigurationProvider.randomAlphaNumericString(), forumId);
+        ContainerConfigurationProvider.randomAlphaNumericString(), forumUuid);
   }
 
   public static void verifyEqualityOfAllAttributes(String tag, MessageEntity expectedMessage,
@@ -39,11 +40,11 @@ public class MessageEntityTest {
     assertEquals(tag + " message.getText", expectedMessage.getText(), message.getText());
     assertEquals(tag + " message.getImageUrl", expectedMessage.getImageUrl(),
         message.getImageUrl());
-    assertEquals(tag + " message.getForumId", expectedMessage.getForumId(), message.getForumId());
+    assertEquals(tag + " message.getForumUuidd", expectedMessage.getForumUuid(), message.getForumUuid());
   }
 
   @Test public void shouldSerializeAndDeserialize() throws IOException {
-    MessageEntity sourceMessage = createRandomNewMessage(1L);
+    MessageEntity sourceMessage = createRandomNewMessage(UUID.randomUUID().toString());
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writer().writeValueAsString(sourceMessage);
     MessageEntity targetMessage = mapper.reader().forType(MessageEntity.class).readValue(json);

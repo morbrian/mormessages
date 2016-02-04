@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 import javax.inject.Inject;
 import javax.websocket.Session;
 
+import java.util.UUID;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class) public class SubscriptionManagerTest {
@@ -32,19 +34,19 @@ import static org.junit.Assert.assertEquals;
   }
 
   @Test public void testSubscribeUnsubscribe() {
-    Long forumId = 1L;
+    String forumUuid = UUID.randomUUID().toString();
     Session mockSession = new MockSession();
     String sessionId = mockSession.getId();
 
-    Subscription sampleSubscription = new Subscription(mockSession, "nobody", forumId);
-    int preSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
+    Subscription sampleSubscription = new Subscription(mockSession, "nobody", forumUuid);
+    int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
 
     subscriptionManager.subscribe(sampleSubscription);
-    int postSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
+    int postSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     assertEquals("subscribed session count", preSessionCount + 1, postSessionCount);
 
     subscriptionManager.unsubscribe(sampleSubscription);
-    int closedSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
+    int closedSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     assertEquals("unsubscribed session count", preSessionCount, closedSessionCount);
   }
 

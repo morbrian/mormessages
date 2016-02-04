@@ -62,7 +62,7 @@ import static org.junit.Assert.assertNotNull;
       List<MessageEntity> messages = new ArrayList<>();
       for (int messageIndex = 0; messageIndex < MESSAGE_COUNT; messageIndex++) {
         messages.add(
-            persistence.createMessage(MessageEntityTest.createRandomNewMessage(forum.getId())));
+            persistence.createMessage(MessageEntityTest.createRandomNewMessage(forum.getUuid())));
       }
       forumMessages.put(forum.getId(), messages);
     }
@@ -81,7 +81,7 @@ import static org.junit.Assert.assertNotNull;
 
   @Test public void shouldFindForumById() throws JsonProcessingException {
     for (ForumEntity expectedForum : forums.values()) {
-      ForumEntity foundForum = repository.findForumById(expectedForum.getId());
+      ForumEntity foundForum = repository.findForumByUuid(expectedForum.getUuid());
       ForumEntityTest.verifyEqualityOfAllAttributes("found", expectedForum, foundForum);
     }
   }
@@ -101,7 +101,7 @@ import static org.junit.Assert.assertNotNull;
     for (ForumEntity forum : forums.values()) {
       List<MessageEntity> expectedMessages = forumMessages.get(forum.getId());
       expectedMessages.sort(RESULT_SORTING_COMPARATOR);
-      List<MessageEntity> foundMessages = repository.listMessagesInForum(forum.getId());
+      List<MessageEntity> foundMessages = repository.listMessagesInForum(forum.getUuid());
       assertEquals("message count", expectedMessages.size(), foundMessages.size());
       for (int i = 0; i < expectedMessages.size(); i++) {
         MessageEntityTest.verifyEqualityOfAllAttributes("messages", expectedMessages.get(i),
@@ -113,8 +113,8 @@ import static org.junit.Assert.assertNotNull;
   @Test public void shouldFindMessageById() throws JsonProcessingException {
     for (ForumEntity forum : forums.values()) {
       for (MessageEntity expectedMessage : forumMessages.get(forum.getId())) {
-        MessageEntity foundMessage = repository.findMessageById(expectedMessage.getId());
-        assertEquals("messages belongs to correct forum", forum.getId(), foundMessage.getForumId());
+        MessageEntity foundMessage = repository.findMessageByUuid(expectedMessage.getUuid());
+        assertEquals("messages belongs to correct forum", forum.getUuid(), foundMessage.getForumUuid());
         MessageEntityTest
             .verifyEqualityOfAllAttributes("found message", expectedMessage, foundMessage);
       }
