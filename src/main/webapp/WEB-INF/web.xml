@@ -8,14 +8,14 @@
     <web-resource-collection>
       <web-resource-name>MorMessagesService</web-resource-name>
       <url-pattern>/api/rest/forum/*</url-pattern>
-      <url-pattern>/api/websocket/forum/*</url-pattern>
+      <!--<url-pattern>/api/websocket/forum/*</url-pattern>-->
     </web-resource-collection>
     <auth-constraint>
       <role-name>user</role-name>
     </auth-constraint>
-    <!--<user-data-constraint>-->
-    <!--<transport-guarantee>CONFIDENTIAL</transport-guarantee>-->
-    <!--</user-data-constraint>-->
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
   </security-constraint>
 
   <!-- Security roles referenced by this web application -->
@@ -27,11 +27,7 @@
   </security-role>
 
   <login-config>
-    <auth-method>FORM</auth-method>
-    <form-login-config>
-      <form-login-page>/api/rest/auth/login</form-login-page>
-      <form-error-page>/api/rest/auth/login</form-error-page>
-    </form-login-config>
+    <auth-method>BASIC</auth-method>
   </login-config>
 
 </web-app>

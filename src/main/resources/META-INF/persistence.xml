@@ -8,7 +8,7 @@
     <!-- this specifies the implementation of the JPA specification, TomEE provides OpenJPA -->
     <!--<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>-->
     <!--<provider>org.hibernate.ejb.HibernatePersistenceProvider</provider>-->
-    <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+    <jta-data-source>java:jboss/datasources/ForumDS</jta-data-source>
     <properties>
       <!-- uncommenting these properties will update the schema in the database, useful primarily for development -->
       <!-- these two are for the openjpa implementation native to TomEE -->
@@ -16,7 +16,8 @@
       <!--<property name="openjpa.InitializeEagerly" value="true"/>-->
       <!-- these net two are for the popular hibernate implementation of JPA -->
       <!--<property name="hibernate.hbm2ddl.auto" value="create"/>-->
-      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <!--<property name="hibernate.hbm2ddl.auto" value="create-drop"/>-->
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
       <property name="hibernate.show_sql" value="false"/>
       <!--<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>-->
     </properties>
