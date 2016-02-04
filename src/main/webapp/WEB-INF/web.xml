@@ -8,7 +8,7 @@
     <web-resource-collection>
       <web-resource-name>MorMessagesService</web-resource-name>
       <url-pattern>/api/rest/forum/*</url-pattern>
-      <!--<url-pattern>/api/websocket/forum/*</url-pattern>-->
+      <url-pattern>/api/websocket/forum/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>user</role-name>
