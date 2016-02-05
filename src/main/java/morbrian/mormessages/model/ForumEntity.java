@@ -13,21 +13,22 @@ import javax.validation.constraints.NotNull;
 
 @NamedQueries({@NamedQuery(
     name = ForumEntity.FIND_ALL,
-    query = "SELECT e FROM ForumEntity e ORDER BY e.id DESC"), @NamedQuery(
-    name = ForumEntity.FIND_ALL_WHERE_ID_GREATER_THAN,
-    query = "SELECT e FROM ForumEntity e WHERE e.id > :id ORDER BY e.id DESC"), @NamedQuery(
-    name = ForumEntity.FIND_ONE_BY_ID,
-    query = "SELECT e FROM ForumEntity e WHERE e.id = :id"), @NamedQuery(
+    query = "SELECT e FROM ForumEntity e ORDER BY e.modifiedTime DESC"), @NamedQuery(
+    name = ForumEntity.FIND_ALL_WHERE_MODIFIED_GREATER_THAN,
+    query = "SELECT e FROM ForumEntity e WHERE e.modifiedTime > :modifiedTime ORDER BY e.modifiedTime DESC"),
+    @NamedQuery(
+        name = ForumEntity.FIND_ONE_BY_UUID,
+        query = "SELECT e FROM ForumEntity e WHERE e.uuid = :uuid"), @NamedQuery(
     name = ForumEntity.FIND_ONE_BY_TITLE,
     query = "SELECT e FROM ForumEntity e WHERE e.title = :title")}) @Entity @Table(name = "forum")
 @Dependent public class ForumEntity extends BaseEntity {
 
   public static final String FIND_ALL = "ForumEntity.findAll";
 
-  public static final String FIND_ALL_WHERE_ID_GREATER_THAN =
-      "ForumEntity.findAllWhereIdGreaterThan";
+  public static final String FIND_ALL_WHERE_MODIFIED_GREATER_THAN =
+      "ForumEntity.findAllWhereModifiedGreaterThan";
 
-  public static final String FIND_ONE_BY_ID = "ForumEntity.findOneById";
+  public static final String FIND_ONE_BY_UUID = "ForumEntity.findOneByUuid";
 
   public static final String FIND_ONE_BY_TITLE = "ForumEntity.findOneByTitle";
 

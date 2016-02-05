@@ -40,6 +40,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -79,13 +80,12 @@ import static org.junit.Assert.assertNotNull;
     client = null;
     credentials = null;
     for (ForumEntity forum : controller.listForums()) {
-      controller.deleteForum(forum.getId());
+      controller.deleteForum(forum.getUuid());
     }
     receivedMessageClient1 = null;
   }
 
   @Test public void testSubscribeUnsubscribe() throws Exception {
-    final Long forumId = 1L;
     WebSocketContainer container = ContainerProvider.getWebSocketContainer();
     ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().build();
 
@@ -95,25 +95,27 @@ import static org.junit.Assert.assertNotNull;
       }
     };
 
-    int preSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
-    URI uri = UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH)
-        .path(forumId.toString()).build();
+    String forumUuid = UUID.randomUUID().toString();
+    int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
+    URI uri =
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+            .build();
     Session session = container.connectToServer(client1, configuration, uri);
 
     Thread.sleep(2000);
-    int postSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
+    int postSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     assertEquals("subscribed session count", preSessionCount + 1, postSessionCount);
 
     session.close();
     Thread.sleep(2000);
-    int closedSessionCount = subscriptionManager.sessionsForTopic(forumId).size();
+    int closedSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     assertEquals("unsubscribed session count", preSessionCount, closedSessionCount);
   }
 
   @Test public void testReceiveMessageOnCreate() throws Exception {
     // create sample forum
     ForumEntity forum = controller.createForum(ForumEntityTest.createRandomNewForum());
-    Long forumId = forum.getId();
+    String forumUuid = forum.getUuid();
 
     WebSocketContainer container = ContainerProvider.getWebSocketContainer();
     ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create()
@@ -122,6 +124,8 @@ import static org.junit.Assert.assertNotNull;
 
     Endpoint client1 = new Endpoint() {
       @Override public void onOpen(Session session, EndpointConfig config) {
+        // warn: use caution before replace with lambda, first try caused runtime error,
+        // jaxrs or cdi could not match parameter type
         session.addMessageHandler(new MessageHandler.Whole<MessageEntity>() {
           @Override public void onMessage(MessageEntity message) {
             logger.info("recieved something(" + message + ")");
@@ -131,17 +135,18 @@ import static org.junit.Assert.assertNotNull;
       }
     };
 
-    URI uri = UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH)
-        .path(forumId.toString()).build();
+    URI uri =
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+            .build();
     container.connectToServer(client1, configuration, uri);
 
     // give the client a little time to connect
     Thread.sleep(2000);
 
     // post a new message
-    MessageEntity sampleMessage = MessageEntityTest.createRandomNewMessage(forumId);
+    MessageEntity sampleMessage = MessageEntityTest.createRandomNewMessage(forumUuid);
     logger.info("client creating message: " + new ObjectMapper().writeValueAsString(sampleMessage));
-    controller.postMessageToForum(sampleMessage, forumId);
+    controller.postMessageToForum(sampleMessage, forumUuid);
 
     // give everybody a little time to process the message
     Thread.sleep(2000);

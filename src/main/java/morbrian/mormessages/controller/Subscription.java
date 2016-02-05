@@ -7,15 +7,15 @@ import java.util.Objects;
 public class Subscription {
   private Session session;
   private String userIdentity;
-  private Long topicId;
+  private String topicId;
 
-  public Subscription(Session session, String userIdentity, Long topicId) {
+  public Subscription(Session session, String userIdentity, String topicId) {
     this.session = session;
     this.userIdentity = userIdentity;
     this.topicId = topicId;
   }
 
-  public Long getTopicId() {
+  public String getTopicId() {
     return topicId;
   }
 

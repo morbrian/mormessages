@@ -78,7 +78,7 @@ import static org.junit.Assert.assertNull;
     client = null;
     credentials = null;
     for (ForumEntity forum : controller.listForums()) {
-      controller.deleteForum(forum.getId());
+      controller.deleteForum(forum.getUuid());
     }
   }
 
@@ -122,7 +122,7 @@ import static org.junit.Assert.assertNull;
     ForumEntity expectedForum = controller.createForum(ForumEntityTest.createRandomNewForum());
 
     // test
-    Response response = client.get(Arrays.asList(FORUM_REST_PATH, expectedForum.getId()), null);
+    Response response = client.get(Arrays.asList(FORUM_REST_PATH, expectedForum.getUuid()), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     ForumEntity resultForum = response.readEntity(ForumEntity.class);
     response.close();
@@ -148,7 +148,7 @@ import static org.junit.Assert.assertNull;
     response.close();
 
     //verify
-    ForumEntity createdForum = controller.getForumById(responseForum.getId());
+    ForumEntity createdForum = controller.getForumByUuid(responseForum.getUuid());
 
     // does the created forum match the data we submitted
     assertEquals("forum.title", submittedForum.getTitle(), createdForum.getTitle());
@@ -175,7 +175,7 @@ import static org.junit.Assert.assertNull;
     sampleForum.setTitle(updateTitle);
     sampleForum.setImageUrl(updateImageUrl);
     Response response =
-        client.post(sampleForum, Arrays.asList(FORUM_REST_PATH, sampleForum.getId()), null);
+        client.post(sampleForum, Arrays.asList(FORUM_REST_PATH, sampleForum.getUuid()), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     ForumEntity responseForum = response.readEntity(ForumEntity.class);
     response.close();
@@ -185,7 +185,7 @@ import static org.junit.Assert.assertNull;
     assertEquals("update title", updateTitle, responseForum.getTitle());
     assertEquals("update description", updateDescription, responseForum.getDescription());
     assertEquals("update imageurl", updateImageUrl, responseForum.getImageUrl());
-    ForumEntity expectedForum = controller.getForumById(sampleForum.getId());
+    ForumEntity expectedForum = controller.getForumByUuid(sampleForum.getUuid());
     ForumEntityTest.verifyEqualityOfAllAttributes("forum", expectedForum, responseForum);
   }
 
@@ -193,10 +193,11 @@ import static org.junit.Assert.assertNull;
     // sample data
     ForumEntity expectedForum = controller.createForum(ForumEntityTest.createRandomNewForum());
     assertEquals("pre-test assumption", expectedForum.getTitle(),
-        controller.getForumById(expectedForum.getId()).getTitle());
+        controller.getForumByUuid(expectedForum.getUuid()).getTitle());
 
     // test
-    Response response = client.delete(Arrays.asList(FORUM_REST_PATH, expectedForum.getId()), null);
+    Response response =
+        client.delete(Arrays.asList(FORUM_REST_PATH, expectedForum.getUuid()), null);
     assertThat("success or no content", response.getStatus(),
         either(equalTo(Response.Status.OK.getStatusCode()))
             .or(equalTo(Response.Status.NO_CONTENT.getStatusCode())));
@@ -204,14 +205,14 @@ import static org.junit.Assert.assertNull;
 
     // verify
     exception.expect(NoResultException.class);
-    assertNull("removed", controller.getForumById(expectedForum.getId()));
+    assertNull("removed", controller.getForumByUuid(expectedForum.getUuid()));
   }
 
   @Test public void shouldPostMessageToForum() throws IOException {
     // sample data
     ForumEntity submittedForum = controller.createForum(ForumEntityTest.createRandomNewForum());
     MessageEntity submittedMessage =
-        MessageEntityTest.createRandomNewMessage(submittedForum.getId());
+        MessageEntityTest.createRandomNewMessage(submittedForum.getUuid());
 
     // test
     Response response = client
@@ -230,12 +231,12 @@ import static org.junit.Assert.assertNull;
     response.close();
 
     //verify
-    MessageEntity createdMessage = controller.getMessageById(responseMessage.getId());
+    MessageEntity createdMessage = controller.getMessageByUuid(responseMessage.getUuid());
 
     // does the created forum match the data we submitted
     assertEquals("messge.text", submittedMessage.getText(), createdMessage.getText());
     assertEquals("message.imageUrl", submittedMessage.getImageUrl(), createdMessage.getImageUrl());
-    assertEquals("message.forumId", submittedMessage.getForumId(), createdMessage.getForumId());
+    assertEquals("message.forumId", submittedMessage.getForumUuid(), createdMessage.getForumUuid());
 
     // verify the created by matches our user
     assertEquals("message.createdBy", credentials.getUsername(), createdMessage.getCreatedByUid());
@@ -248,10 +249,11 @@ import static org.junit.Assert.assertNull;
     // sample data
     ForumEntity forum = controller.createForum(ForumEntityTest.createRandomNewForum());
     List<MessageEntity> sampleMessages =
-        postRandomMessagesToServerInForum(forum.getId(), SAMPLE_DATA_COUNT);
+        postRandomMessagesToServerInForum(forum.getUuid(), SAMPLE_DATA_COUNT);
 
     // test
-    Response response = client.get(Arrays.asList(FORUM_REST_PATH, forum.getId(), "message"), null);
+    Response response =
+        client.get(Arrays.asList(FORUM_REST_PATH, forum.getUuid(), "message"), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     List<MessageEntity> responseMessages =
         response.readEntity(new GenericType<List<MessageEntity>>() {
@@ -267,7 +269,7 @@ import static org.junit.Assert.assertNull;
     // sample data
     ForumEntity forum = controller.createForum(ForumEntityTest.createRandomNewForum());
     List<MessageEntity> expectedList =
-        postRandomMessagesToServerInForum(forum.getId(), LARGE_DATA_COUNT);
+        postRandomMessagesToServerInForum(forum.getUuid(), LARGE_DATA_COUNT);
 
     // test
     int resultSize = 5;
@@ -278,7 +280,7 @@ import static org.junit.Assert.assertNull;
     for (int i = 0; i < LARGE_DATA_COUNT / resultSize; i++) {
       params.put("offset", resultSize * i);
       Response response =
-          client.get(Arrays.asList(FORUM_REST_PATH, forum.getId(), "message"), params);
+          client.get(Arrays.asList(FORUM_REST_PATH, forum.getUuid(), "message"), params);
       assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
       List<MessageEntity> responseMessages =
           response.readEntity(new GenericType<List<MessageEntity>>() {
@@ -294,11 +296,11 @@ import static org.junit.Assert.assertNull;
     }
   }
 
-  private List<MessageEntity> postRandomMessagesToServerInForum(Long forumId, int count) {
+  private List<MessageEntity> postRandomMessagesToServerInForum(String forumUuid, int count) {
     List<MessageEntity> sampleMessages = new ArrayList<>();
     for (int i = 0; i < LARGE_DATA_COUNT; i++) {
       sampleMessages.add(controller
-          .postMessageToForum(MessageEntityTest.createRandomNewMessage(forumId), forumId));
+          .postMessageToForum(MessageEntityTest.createRandomNewMessage(forumUuid), forumUuid));
     }
     sampleMessages.sort(RepositoryTest.RESULT_SORTING_COMPARATOR);
     return sampleMessages;

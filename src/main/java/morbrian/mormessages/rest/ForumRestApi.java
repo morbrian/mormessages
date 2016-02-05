@@ -1,6 +1,8 @@
 package morbrian.mormessages.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.Controller;
+import morbrian.mormessages.dataformat.FormatConstants;
 import morbrian.mormessages.model.BaseEntity;
 import morbrian.mormessages.model.BaseResponse;
 import morbrian.mormessages.model.ForumEntity;
@@ -24,6 +26,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -34,18 +38,18 @@ import java.util.function.Supplier;
 
   @GET @Path("/") @Produces(MediaType.APPLICATION_JSON)
   public List<ForumEntity> listForums(@QueryParam("offset") Integer offset,
-      @QueryParam("resultSize") Integer resultSize, @QueryParam("greaterThan") Long greaterThan) {
-    return controller.listForums(offset, resultSize, greaterThan);
+      @QueryParam("resultSize") Integer resultSize, @QueryParam("greaterThan") String greaterThan) {
+    return controller.listForums(offset, resultSize, parseDateString(greaterThan));
   }
 
-  @GET @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
-  public ForumEntity getForumById(@PathParam("id") Long forumId) {
-    return controller.getForumById(forumId);
+  @GET @Path("/{uuid}") @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity getForumByUuid(@PathParam("uuid") String forumUuid) {
+    return controller.getForumByUuid(forumUuid);
   }
 
-  @POST @Path("/{id}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-  public ForumEntity modifyForum(@PathParam("id") Long forumId, ForumEntity forum) {
-    if (!forumId.equals(forum.getId())) {
+  @POST @Path("/{uuid}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
+  public ForumEntity modifyForum(@PathParam("uuid") String forumUuid, ForumEntity forum) {
+    if (!forumUuid.equals(forum.getUuid())) {
       BaseResponse base = new BaseResponse(
           new Status(Status.Type.ERROR, "url path forumId does not match posted forum.id"));
       Response error = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(base).build();
@@ -64,6 +68,13 @@ import java.util.function.Supplier;
       Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
       throw new WebApplicationException(error);
     }
+    // fail for uuid conflict (such as when client incorrectly tries to re-use an already created uuid)
+    if (controller.uuidExists(forum.getUuid())) {
+      BaseResponse base = new BaseResponse(
+          new Status(Status.Type.ERROR, "forum already exists for uuid " + forum.getUuid()));
+      Response error = Response.status(Response.Status.CONFLICT).entity(base).build();
+      throw new WebApplicationException(error);
+    }
     // fail for id already set
     if (forum.getId() != null) {
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
@@ -74,24 +85,41 @@ import java.util.function.Supplier;
     return (ForumEntity) createEntity(() -> controller.createForum(forum), response);
   }
 
-  @DELETE @Path("/{id}") @Produces(MediaType.APPLICATION_JSON)
-  public void deleteForum(@PathParam("id") Long forumId) {
-    controller.deleteForum(forumId);
+  @DELETE @Path("/{uuid}") @Produces(MediaType.APPLICATION_JSON)
+  public void deleteForum(@PathParam("uuid") String forumUuid) {
+    controller.deleteForum(forumUuid);
   }
 
-  @GET @Path("/{id}/message") @Produces(MediaType.APPLICATION_JSON)
-  public List<MessageEntity> listMessages(@PathParam("id") Long forumId,
+  @GET @Path("/{uuid}/message") @Produces(MediaType.APPLICATION_JSON)
+  public List<MessageEntity> listMessages(@PathParam("uuid") String forumUuid,
       @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize,
-      @QueryParam("greaterThan") Long greaterThan) {
-    return controller.listMessagesInForum(forumId, offset, resultSize, greaterThan);
+      @QueryParam("greaterThan") String greaterThan) {
+    return controller
+        .listMessagesInForum(forumUuid, offset, resultSize, parseDateString(greaterThan));
   }
 
-  @PUT @Path("/{id}/message") @Consumes(MediaType.APPLICATION_JSON)
+  @PUT @Path("/{uuid}/message") @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public MessageEntity postMessageToForum(MessageEntity message, @PathParam("id") Long forumId,
-      @Context final HttpServletResponse response) throws Exception {
-    return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumId),
+  public MessageEntity postMessageToForum(MessageEntity message,
+      @PathParam("uuid") String forumUuid, @Context final HttpServletResponse response)
+      throws Exception {
+    return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumUuid),
         response);
+  }
+
+  private Calendar parseDateString(String dateString) {
+    if (dateString == null) {
+      return null;
+    }
+    Calendar calendar = null;
+    try {
+      return new ObjectMapper().readValue(dateString, Calendar.class);
+    } catch (IOException e) {
+      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
+          "invalid date string; must format like " + FormatConstants.DEFAULT_DATE_FORMAT));
+      Response error = Response.status(Response.Status.BAD_REQUEST).entity(base).build();
+      throw new WebApplicationException(error);
+    }
   }
 
   private BaseEntity createEntity(Supplier<? extends BaseEntity> creator,

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
   @Inject private Logger logger;
 
-  private Map<Long, Set<Subscription>> topicToSubscription =
+  private Map<String, Set<Subscription>> topicToSubscription =
       Collections.synchronizedMap(new HashMap<>());
   private Map<String, Subscription> sessionToSubscription =
       Collections.synchronizedMap(new HashMap<>());
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
     unsubscribe(subscription);
   }
 
-  public synchronized List<Session> sessionsForTopic(Long topicId) {
+  public synchronized List<Session> sessionsForTopic(String topicId) {
     Set<Subscription> topicGroup = topicToSubscription.get(topicId);
     if (topicGroup == null) {
       return Collections.emptyList();
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
   }
 
   public synchronized void subscribe(Subscription subscription) {
-    Long topicId = subscription.getTopicId();
+    String topicId = subscription.getTopicId();
     String userId = subscription.getUserIdentity();
     String sessionId = subscription.getSession().getId();
 
@@ -75,7 +75,7 @@ import java.util.stream.Collectors;
   }
 
   public synchronized void unsubscribe(Subscription subscription) {
-    Long topicId = subscription.getTopicId();
+    String topicId = subscription.getTopicId();
     String userId = subscription.getUserIdentity();
     String sessionId = subscription.getSession().getId();
 

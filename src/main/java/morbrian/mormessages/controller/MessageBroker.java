@@ -16,7 +16,7 @@ import java.util.List;
   @Inject private SubscriptionManager subscriptionManager;
 
   public void publishMessage(@Observes @Created MessageEntity message) {
-    Long topicId = message.getForumId();
+    String topicId = message.getForumUuid();
     List<Session> sessions = subscriptionManager.sessionsForTopic(topicId);
     if (logger.isDebugEnabled()) {
       logger.debug(

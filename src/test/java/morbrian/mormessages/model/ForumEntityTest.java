@@ -6,6 +6,7 @@ import morbrian.test.provisioning.ContainerConfigurationProvider;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,6 +40,9 @@ public class ForumEntityTest {
 
   @Test public void shouldSerializeAndDeserialize() throws IOException {
     ForumEntity sourceForum = createRandomNewForum();
+    Calendar calendar = Calendar.getInstance();
+    sourceForum.setCreatedTime(calendar);
+    sourceForum.setModifiedTime(calendar);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writer().writeValueAsString(sourceForum);
     ForumEntity targetForum = mapper.reader().forType(ForumEntity.class).readValue(json);

@@ -12,6 +12,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import java.security.Principal;
+import java.util.Calendar;
 import java.util.List;
 
 @ApplicationScoped public class ControllerImplJpa implements Controller {
@@ -27,12 +28,12 @@ import java.util.List;
   }
 
   @Override
-  public List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan) {
+  public List<ForumEntity> listForums(Integer offset, Integer resultSize, Calendar greaterThan) {
     return repository.listForums(offset, resultSize, greaterThan);
   }
 
-  @Override public ForumEntity getForumById(Long forumId) {
-    return repository.findForumById(forumId);
+  @Override public ForumEntity getForumByUuid(String forumUuid) {
+    return repository.findForumByUuid(forumUuid);
   }
 
   public ForumEntity getForumByTitle(String title) {
@@ -48,6 +49,15 @@ import java.util.List;
     }
   }
 
+  @Override public boolean uuidExists(String uuid) {
+    try {
+      getForumByUuid(uuid);
+      return true;
+    } catch (NoResultException exc) {
+      return false;
+    }
+  }
+
   @Override public ForumEntity modifyForum(ForumEntity forum) {
     return persistence.updateForum(forum);
   }
@@ -56,26 +66,25 @@ import java.util.List;
     return persistence.createForum(forum);
   }
 
-  @Override public void deleteForum(Long forumId) {
-    persistence.removeEntity(repository.findForumById(forumId));
+  @Override public void deleteForum(String forumUuid) {
+    persistence.removeEntity(repository.findForumByUuid(forumUuid));
   }
 
-  @Override public MessageEntity getMessageById(Long messageId) {
-    return repository.findMessageById(messageId);
+  @Override public MessageEntity getMessageByUuid(String messageUuid) {
+    return repository.findMessageByUuid(messageUuid);
   }
 
-  @Override public List<MessageEntity> listMessagesInForum(Long forumId) {
-    return repository.listMessagesInForum(forumId);
+  @Override public List<MessageEntity> listMessagesInForum(String forumUuid) {
+    return repository.listMessagesInForum(forumUuid);
   }
 
-  @Override
-  public List<MessageEntity> listMessagesInForum(Long forumId, Integer offset, Integer resultSize,
-      Long greaterThan) {
-    return repository.listMessagesInForum(forumId, offset, resultSize, greaterThan);
+  @Override public List<MessageEntity> listMessagesInForum(String forumUuid, Integer offset,
+      Integer resultSize, Calendar greaterThan) {
+    return repository.listMessagesInForum(forumUuid, offset, resultSize, greaterThan);
   }
 
-  @Override public MessageEntity postMessageToForum(MessageEntity message, Long forumId) {
-    message.setForumId(forumId);
+  @Override public MessageEntity postMessageToForum(MessageEntity message, String forumUuid) {
+    message.setForumUuid(forumUuid);
     MessageEntity createdMessage = persistence.createMessage(message);
     messageEventSrc.select(Created.SELECTOR).fire(createdMessage);
     return createdMessage;
