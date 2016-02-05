@@ -3,13 +3,14 @@ package morbrian.mormessages.controller;
 import morbrian.mormessages.model.ForumEntity;
 import morbrian.mormessages.model.MessageEntity;
 
+import java.util.Calendar;
 import java.util.List;
 
 public interface Controller {
 
   List<ForumEntity> listForums();
 
-  List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan);
+  List<ForumEntity> listForums(Integer offset, Integer resultSize, Calendar greaterThan);
 
   ForumEntity getForumByUuid(String forumUuid);
 
@@ -28,7 +29,7 @@ public interface Controller {
   List<MessageEntity> listMessagesInForum(String forumUuid);
 
   List<MessageEntity> listMessagesInForum(String forumUuid, Integer offset, Integer resultSize,
-      Long greaterThan);
+      Calendar greaterThan);
 
   MessageEntity postMessageToForum(MessageEntity message, String forumUuid);
 

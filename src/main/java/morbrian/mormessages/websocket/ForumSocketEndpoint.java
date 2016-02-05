@@ -35,8 +35,8 @@ public class ForumSocketEndpoint {
   @OnOpen public void onOpen(Session session, @PathParam("forumId") String forumUuid) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    logger.info(
-        "New websocket session opened: " + wrapForLogging(userIdentity, forumUuid, session.getId()));
+    logger.info("New websocket session opened: " + wrapForLogging(userIdentity, forumUuid,
+        session.getId()));
     if (userIdentity == null) {
       // TODO: we don't want unauthenticated users subscribing
       logger.warn("Opening session(" + session.getId() + ") for null userIdentity");
@@ -58,9 +58,8 @@ public class ForumSocketEndpoint {
 
   }
 
-  @OnMessage
-  public void onMessage(Session session, MessageEntity message, @PathParam("forumId") String forumUuid)
-      throws IOException, EncodeException {
+  @OnMessage public void onMessage(Session session, MessageEntity message,
+      @PathParam("forumId") String forumUuid) throws IOException, EncodeException {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.error("Received Message: " + wrapForLogging(userIdentity, forumUuid, session.getId()) +

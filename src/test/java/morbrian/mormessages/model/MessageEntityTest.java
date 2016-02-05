@@ -40,7 +40,8 @@ public class MessageEntityTest {
     assertEquals(tag + " message.getText", expectedMessage.getText(), message.getText());
     assertEquals(tag + " message.getImageUrl", expectedMessage.getImageUrl(),
         message.getImageUrl());
-    assertEquals(tag + " message.getForumUuidd", expectedMessage.getForumUuid(), message.getForumUuid());
+    assertEquals(tag + " message.getForumUuidd", expectedMessage.getForumUuid(),
+        message.getForumUuid());
   }
 
   @Test public void shouldSerializeAndDeserialize() throws IOException {

@@ -12,19 +12,19 @@ import javax.persistence.Table;
 
 @NamedQueries({@NamedQuery(
     name = MessageEntity.FIND_ALL_IN_FORUM,
-    query = "SELECT e FROM MessageEntity e WHERE e.forumUuid = :forumUuid ORDER BY e.id DESC"),
+    query = "SELECT e FROM MessageEntity e WHERE e.forumUuid = :forumUuid ORDER BY e.modifiedTime DESC"),
     @NamedQuery(
-        name = MessageEntity.FIND_ALL_IN_FORUM_WHERE_ID_GREATER_THAN,
-        query = "SELECT e FROM MessageEntity e WHERE e.forumUuid = :forumUuid AND e.id > :id ORDER BY e.id DESC"),
+        name = MessageEntity.FIND_ALL_IN_FORUM_WHERE_MODIFIED_GREATER_THAN,
+        query = "SELECT e FROM MessageEntity e WHERE e.forumUuid = :forumUuid AND e.modifiedTime > :modifiedTime ORDER BY e.modifiedTime DESC"),
     @NamedQuery(
         name = MessageEntity.FIND_ONE_BY_UUID,
-        query = "SELECT e FROM MessageEntity e WHERE e.uuid = :uuid")}) @Entity @Table(name = "message")
-@Dependent public class MessageEntity extends BaseEntity {
+        query = "SELECT e FROM MessageEntity e WHERE e.uuid = :uuid")}) @Entity
+@Table(name = "message") @Dependent public class MessageEntity extends BaseEntity {
 
   public static final String FIND_ALL_IN_FORUM = "MessageEntity.findAllInForum";
 
-  public static final String FIND_ALL_IN_FORUM_WHERE_ID_GREATER_THAN =
-      "MessageEntity.findAllInForumWhereIdGreaterThan";
+  public static final String FIND_ALL_IN_FORUM_WHERE_MODIFIED_GREATER_THAN =
+      "MessageEntity.findAllInForumWhereModifiedGreaterThan";
 
   public static final String FIND_ONE_BY_UUID = "MessageEntity.findOneByUuid";
 

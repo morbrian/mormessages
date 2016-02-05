@@ -12,6 +12,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import java.security.Principal;
+import java.util.Calendar;
 import java.util.List;
 
 @ApplicationScoped public class ControllerImplJpa implements Controller {
@@ -27,7 +28,7 @@ import java.util.List;
   }
 
   @Override
-  public List<ForumEntity> listForums(Integer offset, Integer resultSize, Long greaterThan) {
+  public List<ForumEntity> listForums(Integer offset, Integer resultSize, Calendar greaterThan) {
     return repository.listForums(offset, resultSize, greaterThan);
   }
 
@@ -77,9 +78,8 @@ import java.util.List;
     return repository.listMessagesInForum(forumUuid);
   }
 
-  @Override
-  public List<MessageEntity> listMessagesInForum(String forumUuid, Integer offset, Integer resultSize,
-      Long greaterThan) {
+  @Override public List<MessageEntity> listMessagesInForum(String forumUuid, Integer offset,
+      Integer resultSize, Calendar greaterThan) {
     return repository.listMessagesInForum(forumUuid, offset, resultSize, greaterThan);
   }
 

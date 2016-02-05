@@ -1,6 +1,8 @@
 package morbrian.mormessages.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.Controller;
+import morbrian.mormessages.dataformat.FormatConstants;
 import morbrian.mormessages.model.BaseEntity;
 import morbrian.mormessages.model.BaseResponse;
 import morbrian.mormessages.model.ForumEntity;
@@ -24,6 +26,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -34,8 +38,8 @@ import java.util.function.Supplier;
 
   @GET @Path("/") @Produces(MediaType.APPLICATION_JSON)
   public List<ForumEntity> listForums(@QueryParam("offset") Integer offset,
-      @QueryParam("resultSize") Integer resultSize, @QueryParam("greaterThan") Long greaterThan) {
-    return controller.listForums(offset, resultSize, greaterThan);
+      @QueryParam("resultSize") Integer resultSize, @QueryParam("greaterThan") String greaterThan) {
+    return controller.listForums(offset, resultSize, parseDateString(greaterThan));
   }
 
   @GET @Path("/{uuid}") @Produces(MediaType.APPLICATION_JSON)
@@ -89,16 +93,33 @@ import java.util.function.Supplier;
   @GET @Path("/{uuid}/message") @Produces(MediaType.APPLICATION_JSON)
   public List<MessageEntity> listMessages(@PathParam("uuid") String forumUuid,
       @QueryParam("offset") Integer offset, @QueryParam("resultSize") Integer resultSize,
-      @QueryParam("greaterThan") Long greaterThan) {
-    return controller.listMessagesInForum(forumUuid, offset, resultSize, greaterThan);
+      @QueryParam("greaterThan") String greaterThan) {
+    return controller
+        .listMessagesInForum(forumUuid, offset, resultSize, parseDateString(greaterThan));
   }
 
   @PUT @Path("/{uuid}/message") @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public MessageEntity postMessageToForum(MessageEntity message, @PathParam("uuid") String forumUuid,
-      @Context final HttpServletResponse response) throws Exception {
+  public MessageEntity postMessageToForum(MessageEntity message,
+      @PathParam("uuid") String forumUuid, @Context final HttpServletResponse response)
+      throws Exception {
     return (MessageEntity) createEntity(() -> controller.postMessageToForum(message, forumUuid),
         response);
+  }
+
+  private Calendar parseDateString(String dateString) {
+    if (dateString == null) {
+      return null;
+    }
+    Calendar calendar = null;
+    try {
+      return new ObjectMapper().readValue(dateString, Calendar.class);
+    } catch (IOException e) {
+      BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
+          "invalid date string; must format like " + FormatConstants.DEFAULT_DATE_FORMAT));
+      Response error = Response.status(Response.Status.BAD_REQUEST).entity(base).build();
+      throw new WebApplicationException(error);
+    }
   }
 
   private BaseEntity createEntity(Supplier<? extends BaseEntity> creator,

@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.websocket.Session;
-
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;

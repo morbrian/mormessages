@@ -97,8 +97,9 @@ import static org.junit.Assert.assertNotNull;
 
     String forumUuid = UUID.randomUUID().toString();
     int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
-    URI uri = UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH)
-        .path(forumUuid).build();
+    URI uri =
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+            .build();
     Session session = container.connectToServer(client1, configuration, uri);
 
     Thread.sleep(2000);
@@ -134,8 +135,9 @@ import static org.junit.Assert.assertNotNull;
       }
     };
 
-    URI uri = UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH)
-        .path(forumUuid).build();
+    URI uri =
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+            .build();
     container.connectToServer(client1, configuration, uri);
 
     // give the client a little time to connect

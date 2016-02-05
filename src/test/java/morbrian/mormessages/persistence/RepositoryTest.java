@@ -30,7 +30,7 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(Arquillian.class) public class RepositoryTest {
 
   public static final Comparator<? super BaseEntity> RESULT_SORTING_COMPARATOR =
-      Comparator.comparing(BaseEntity::getId).reversed();
+      Comparator.comparing(BaseEntity::getModifiedTime).reversed();
 
   private static final int FORUM_COUNT = 5;
   private static final int MESSAGE_COUNT = 10;
@@ -114,7 +114,8 @@ import static org.junit.Assert.assertNotNull;
     for (ForumEntity forum : forums.values()) {
       for (MessageEntity expectedMessage : forumMessages.get(forum.getId())) {
         MessageEntity foundMessage = repository.findMessageByUuid(expectedMessage.getUuid());
-        assertEquals("messages belongs to correct forum", forum.getUuid(), foundMessage.getForumUuid());
+        assertEquals("messages belongs to correct forum", forum.getUuid(),
+            foundMessage.getForumUuid());
         MessageEntityTest
             .verifyEqualityOfAllAttributes("found message", expectedMessage, foundMessage);
       }

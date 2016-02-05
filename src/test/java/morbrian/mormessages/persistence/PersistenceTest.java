@@ -19,7 +19,6 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
-
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -79,7 +78,8 @@ import static org.junit.Assert.*;
 
   @Test public void shouldCreateMessage() throws JsonProcessingException {
     ForumEntity createdForum = persistence.createForum(ForumEntityTest.createRandomNewForum());
-    MessageEntity expectedMessage = MessageEntityTest.createRandomNewMessage(createdForum.getUuid());
+    MessageEntity expectedMessage =
+        MessageEntityTest.createRandomNewMessage(createdForum.getUuid());
     MessageEntity createdMessage = persistence.createMessage(expectedMessage);
 
     assertTrue("message id greater than 0", createdMessage.getId() > 0);
@@ -90,7 +90,8 @@ import static org.junit.Assert.*;
 
   @Test public void shouldThrowExceptionWhenMessageCreatedForNonexistentForumId()
       throws JsonProcessingException {
-    MessageEntity expectedMessage = MessageEntityTest.createRandomNewMessage(UUID.randomUUID().toString());
+    MessageEntity expectedMessage =
+        MessageEntityTest.createRandomNewMessage(UUID.randomUUID().toString());
     exception.expect(PersistenceException.class);
     persistence.createMessage(expectedMessage);
   }

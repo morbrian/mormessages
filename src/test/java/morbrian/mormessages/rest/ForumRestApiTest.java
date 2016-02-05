@@ -196,7 +196,8 @@ import static org.junit.Assert.assertNull;
         controller.getForumByUuid(expectedForum.getUuid()).getTitle());
 
     // test
-    Response response = client.delete(Arrays.asList(FORUM_REST_PATH, expectedForum.getUuid()), null);
+    Response response =
+        client.delete(Arrays.asList(FORUM_REST_PATH, expectedForum.getUuid()), null);
     assertThat("success or no content", response.getStatus(),
         either(equalTo(Response.Status.OK.getStatusCode()))
             .or(equalTo(Response.Status.NO_CONTENT.getStatusCode())));
@@ -251,7 +252,8 @@ import static org.junit.Assert.assertNull;
         postRandomMessagesToServerInForum(forum.getUuid(), SAMPLE_DATA_COUNT);
 
     // test
-    Response response = client.get(Arrays.asList(FORUM_REST_PATH, forum.getUuid(), "message"), null);
+    Response response =
+        client.get(Arrays.asList(FORUM_REST_PATH, forum.getUuid(), "message"), null);
     assertEquals("response", Response.Status.OK.getStatusCode(), response.getStatus());
     List<MessageEntity> responseMessages =
         response.readEntity(new GenericType<List<MessageEntity>>() {

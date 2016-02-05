@@ -1,5 +1,11 @@
 package morbrian.mormessages.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import morbrian.mormessages.dataformat.CalendarDeserializer;
+import morbrian.mormessages.dataformat.CalendarSerializer;
+
+import javax.enterprise.context.Dependent;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -10,7 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Calendar;
 
-@MappedSuperclass @EntityListeners({BaseEntityListener.class}) public class BaseEntity {
+@MappedSuperclass @EntityListeners({BaseEntityListener.class}) @Dependent public class BaseEntity {
 
   @Temporal(TemporalType.TIMESTAMP) @Column(name = "created_time", updatable = false)
   private Calendar createdTime;
@@ -30,18 +36,20 @@ import java.util.Calendar;
     this.id = id;
   }
 
-  public Calendar getCreatedTime() {
+  @JsonSerialize(using = CalendarSerializer.class) public Calendar getCreatedTime() {
     return createdTime;
   }
 
+  @JsonDeserialize(using = CalendarDeserializer.class)
   public void setCreatedTime(Calendar createdTime) {
     this.createdTime = createdTime;
   }
 
-  public Calendar getModifiedTime() {
+  @JsonSerialize(using = CalendarSerializer.class) public Calendar getModifiedTime() {
     return modifiedTime;
   }
 
+  @JsonDeserialize(using = CalendarDeserializer.class)
   public void setModifiedTime(Calendar modifiedTime) {
     this.modifiedTime = modifiedTime;
   }
