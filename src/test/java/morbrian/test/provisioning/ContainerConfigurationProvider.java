@@ -7,6 +7,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.PasswordAuthentication;
 import java.util.UUID;
 
 public class ContainerConfigurationProvider {
@@ -83,4 +84,11 @@ public class ContainerConfigurationProvider {
       this.value = value;
     }
   }
+
+  public PasswordAuthentication getPasswordAuthentication() {
+    return new PasswordAuthentication(this.getUsername(),
+        this.getPassword().toCharArray());
+  }
+
+
 }

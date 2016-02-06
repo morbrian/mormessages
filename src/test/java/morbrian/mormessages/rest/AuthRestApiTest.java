@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.ws.rs.core.Response;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -41,7 +42,7 @@ import static org.junit.Assert.assertTrue;
   }
 
   @Before public void setup() {
-    client = new SimpleClient(webappUrl.toString());
+    client = new SimpleClient(webappUrl.toString(), configProvider.getPasswordAuthentication());
   }
 
   @After public void teardown() {
@@ -114,7 +115,8 @@ import static org.junit.Assert.assertTrue;
   }
 
   private Credentials getCredentials() {
-    return new Credentials(configProvider.getUsername(), configProvider.getPassword());
+    PasswordAuthentication auth = configProvider.getPasswordAuthentication();
+    return new Credentials(auth.getUserName(), new String(auth.getPassword()));
   }
 
 }

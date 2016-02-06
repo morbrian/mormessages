@@ -30,6 +30,7 @@ import javax.persistence.NoResultException;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +58,6 @@ import static org.junit.Assert.assertNull;
   @Inject Controller controller;
   @ArquillianResource private URL webappUrl;
   private SimpleClient client;
-  private Credentials credentials;
 
   @Deployment public static Archive<?> createDeployment() {
     return configProvider.createDeployment();
@@ -69,14 +69,12 @@ import static org.junit.Assert.assertNull;
   }
 
   @Before public void setup() {
-    client = new SimpleClient(webappUrl.toString());
-    credentials = getCredentials();
-    client.post(credentials, Arrays.asList(AUTH_REST_PATH, "login"), null).close();
+    client = new SimpleClient(webappUrl.toString(), configProvider.getPasswordAuthentication());
+    client.post(getCredentials(), Arrays.asList(AUTH_REST_PATH, "login"), null).close();
   }
 
   @After public void teardown() {
     client = null;
-    credentials = null;
     for (ForumEntity forum : controller.listForums()) {
       controller.deleteForum(forum.getUuid());
     }
@@ -157,7 +155,7 @@ import static org.junit.Assert.assertNull;
     assertEquals("forum.imageUrl", submittedForum.getImageUrl(), createdForum.getImageUrl());
 
     // verify the created by matches our user
-    assertEquals("forum.createdBy", credentials.getUsername(), createdForum.getCreatedByUid());
+    assertEquals("forum.createdBy", configProvider.getUsername(), createdForum.getCreatedByUid());
 
     // verify the forum data we recieved back matches database
     ForumEntityTest.verifyEqualityOfAllAttributes("forum", createdForum, responseForum);
@@ -181,7 +179,7 @@ import static org.junit.Assert.assertNull;
     response.close();
 
     // verify
-    assertEquals("updatedByUid", credentials.getUsername(), responseForum.getModifiedByUid());
+    assertEquals("updatedByUid", configProvider.getUsername(), responseForum.getModifiedByUid());
     assertEquals("update title", updateTitle, responseForum.getTitle());
     assertEquals("update description", updateDescription, responseForum.getDescription());
     assertEquals("update imageurl", updateImageUrl, responseForum.getImageUrl());
@@ -239,7 +237,7 @@ import static org.junit.Assert.assertNull;
     assertEquals("message.forumId", submittedMessage.getForumUuid(), createdMessage.getForumUuid());
 
     // verify the created by matches our user
-    assertEquals("message.createdBy", credentials.getUsername(), createdMessage.getCreatedByUid());
+    assertEquals("message.createdBy", configProvider.getUsername(), createdMessage.getCreatedByUid());
 
     // verify the forum data we recieved back matches database
     MessageEntityTest.verifyEqualityOfAllAttributes("message", createdMessage, responseMessage);
@@ -307,7 +305,8 @@ import static org.junit.Assert.assertNull;
   }
 
   private Credentials getCredentials() {
-    return new Credentials(configProvider.getUsername(), configProvider.getPassword());
+    PasswordAuthentication auth = configProvider.getPasswordAuthentication();
+    return new Credentials(auth.getUserName(), new String(auth.getPassword()));
   }
 
 }

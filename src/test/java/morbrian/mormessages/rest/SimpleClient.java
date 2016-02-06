@@ -6,6 +6,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.util.List;
 import java.util.Map;
 
@@ -15,9 +17,9 @@ public class SimpleClient {
   private final WebTarget target;
   private final String baseUrl;
 
-  public SimpleClient(String baseUrl) {
+  public SimpleClient(String baseUrl, PasswordAuthentication auth) {
     this.baseUrl = baseUrl;
-    client = ClientBuilder.newClient();
+    client = ClientBuilder.newClient().register(new PasswordAuthenticator(auth));
     target = client.target(baseUrl);
   }
 
