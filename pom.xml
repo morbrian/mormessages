@@ -137,6 +137,13 @@
   <profiles>
     <profile>
       <id>cli-app-cxf</id>
+      <!--
+        When running the CLI to test a server using self signed certs,
+        it may be useful to add the following JVM param to
+        the CLI run configuration when running the app in your IDE:
+
+            -Djavax.net.ssl.trustStore=src/test/certs/mormessages-trust.jks
+        -->
       <dependencies>
         <dependency>
           <groupId>org.apache.cxf</groupId>

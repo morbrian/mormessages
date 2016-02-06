@@ -42,7 +42,16 @@ public class MorMessagesRestCli {
     // -Djavax.net.ssl.trustStore=src/test/certs/mormessages-trust.jks
     URL url = new URL("https://mormessages.morbrian.com:8443/mormessages");
     PasswordAuthentication credentials = new PasswordAuthentication("sampleuser", "changeme".toCharArray());
-    MorMessagesRestCli app = new MorMessagesRestCli(url, credentials);
+    MorMessagesRestCli app = null;
+
+    try {
+      app = new MorMessagesRestCli(url, credentials);
+    } catch(Exception e) {
+      System.err.println("Failed to run app: " + e.getMessage());
+      System.err.println("If you are running this from maven or your IDE, remember to enable the 'cli-app-cxf' profile.");
+      System.exit(1);
+    }
+
     app.authenticate();
 
     for (int fIdx = 0; fIdx < 100; ++fIdx) {
