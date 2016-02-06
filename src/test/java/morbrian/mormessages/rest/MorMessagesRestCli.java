@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
-public class ForumRestCli {
+public class MorMessagesRestCli {
   private static final int SAMPLE_DATA_COUNT = 10;
   private static final int LARGE_DATA_COUNT = 50;
   private static final String AUTH_REST_PATH = "api/rest/auth/";
@@ -30,7 +30,7 @@ public class ForumRestCli {
   private SimpleClient client;
   private PasswordAuthentication auth;
 
-  public ForumRestCli(URL webappUrl, PasswordAuthentication auth) {
+  public MorMessagesRestCli(URL webappUrl, PasswordAuthentication auth) {
     this.webappUrl = webappUrl;
     this.auth = auth;
     client = new SimpleClient(webappUrl.toString(), auth);
@@ -42,7 +42,7 @@ public class ForumRestCli {
     // -Djavax.net.ssl.trustStore=src/test/certs/mormessages-trust.jks
     URL url = new URL("https://mormessages.morbrian.com:8443/mormessages");
     PasswordAuthentication credentials = new PasswordAuthentication("sampleuser", "changeme".toCharArray());
-    ForumRestCli app = new ForumRestCli(url, credentials);
+    MorMessagesRestCli app = new MorMessagesRestCli(url, credentials);
     app.authenticate();
 
     for (int fIdx = 0; fIdx < 100; ++fIdx) {
