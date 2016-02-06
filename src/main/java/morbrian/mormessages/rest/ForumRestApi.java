@@ -27,6 +27,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.function.Supplier;
@@ -111,10 +113,10 @@ import java.util.function.Supplier;
     if (dateString == null) {
       return null;
     }
-    Calendar calendar = null;
     try {
-      return new ObjectMapper().readValue(dateString, Calendar.class);
-    } catch (IOException e) {
+        SimpleDateFormat format = new SimpleDateFormat(FormatConstants.DEFAULT_DATE_FORMAT);
+        return new Calendar.Builder().setInstant(format.parse(dateString)).build();
+    } catch (ParseException e) {
       BaseResponse base = new BaseResponse(new Status(Status.Type.ERROR,
           "invalid date string; must format like " + FormatConstants.DEFAULT_DATE_FORMAT));
       Response error = Response.status(Response.Status.BAD_REQUEST).entity(base).build();

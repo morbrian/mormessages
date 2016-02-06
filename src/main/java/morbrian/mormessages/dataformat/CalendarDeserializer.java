@@ -15,7 +15,7 @@ public class CalendarDeserializer extends JsonDeserializer<Calendar> {
   public Calendar deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
       throws IOException, JsonProcessingException {
     SimpleDateFormat format = new SimpleDateFormat(FormatConstants.DEFAULT_DATE_FORMAT);
-    String dateString = jsonParser.getText();
+    String dateString = jsonParser.getValueAsString();
     try {
       return new Calendar.Builder().setInstant(format.parse(dateString)).build();
     } catch (ParseException e) {

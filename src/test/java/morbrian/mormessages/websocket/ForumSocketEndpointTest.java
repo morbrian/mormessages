@@ -9,6 +9,7 @@ import morbrian.mormessages.model.ForumEntityTest;
 import morbrian.mormessages.model.MessageEntity;
 import morbrian.mormessages.model.MessageEntityTest;
 import morbrian.mormessages.rest.ForumRestApi;
+import morbrian.mormessages.rest.PasswordAuthenticator;
 import morbrian.mormessages.rest.SimpleClient;
 import morbrian.test.provisioning.ContainerConfigurationProvider;
 import morbrian.test.provisioning.VendorSpecificProvisioner;
@@ -37,9 +38,14 @@ import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import javax.ws.rs.core.UriBuilder;
+import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +64,6 @@ import static org.junit.Assert.assertNotNull;
   @Inject private SubscriptionManager subscriptionManager;
   @ArquillianResource private URL webappUrl;
   private SimpleClient client;
-  private Credentials credentials;
 
   @Deployment public static Archive<?> createDeployment() {
     return configProvider.createDeployment();
@@ -70,15 +75,13 @@ import static org.junit.Assert.assertNotNull;
   }
 
   @Before public void setup() {
-    client = new SimpleClient(webappUrl.toString());
-    credentials = getCredentials();
-    client.post(credentials, Arrays.asList(AUTH_REST_PATH, "login"), null).close();
+    client = new SimpleClient(webappUrl.toString(), configProvider.getPasswordAuthentication());
+    client.post(getCredentials(), Arrays.asList(AUTH_REST_PATH, "login"), null).close();
     receivedMessageClient1 = null;
   }
 
   @After public void teardown() {
     client = null;
-    credentials = null;
     for (ForumEntity forum : controller.listForums()) {
       controller.deleteForum(forum.getUuid());
     }
@@ -86,9 +89,15 @@ import static org.junit.Assert.assertNotNull;
   }
 
   @Test public void testSubscribeUnsubscribe() throws Exception {
+
+    Map<String, List<String>> headers = new HashMap<>();
+    headers.put("Authorization",
+        Collections.singletonList(
+            PasswordAuthenticator.getBasicAuthentication(configProvider.getPasswordAuthentication())));
+
     WebSocketContainer container = ContainerProvider.getWebSocketContainer();
     ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().build();
-
+    configuration.getConfigurator().beforeRequest(headers);
     Endpoint client1 = new Endpoint() {
       @Override public void onOpen(Session session, EndpointConfig config) {
         // nothing to do
@@ -99,6 +108,7 @@ import static org.junit.Assert.assertNotNull;
     int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     URI uri =
         UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+            .userInfo(PasswordAuthenticator.getToken(configProvider.getPasswordAuthentication()))
             .build();
     Session session = container.connectToServer(client1, configuration, uri);
 
@@ -156,6 +166,8 @@ import static org.junit.Assert.assertNotNull;
   }
 
   private Credentials getCredentials() {
-    return new Credentials(configProvider.getUsername(), configProvider.getPassword());
+    PasswordAuthentication auth = configProvider.getPasswordAuthentication();
+    return new Credentials(auth.getUserName(), new String(auth.getPassword()));
   }
+
 }

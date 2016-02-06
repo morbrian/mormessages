@@ -35,26 +35,28 @@ public class ForumSocketEndpoint {
   @OnOpen public void onOpen(Session session, @PathParam("forumId") String forumUuid) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    logger.info("New websocket session opened: " + wrapForLogging(userIdentity, forumUuid,
-        session.getId()));
     if (userIdentity == null) {
       // TODO: we don't want unauthenticated users subscribing
-      logger.warn("Opening session(" + session.getId() + ") for null userIdentity");
+      logger.warn("Ignoring connected session(" + session.getId() + ") for null userIdentity");
+    } else {
+      logger.info("New websocket session opened: " + wrapForLogging(userIdentity, forumUuid,
+          session.getId()));
+      Subscription subscription = new Subscription(session, userIdentity, forumUuid);
+      subscriptionEventSrc.select(Opened.SELECTOR).fire(subscription);
     }
-    Subscription subscription = new Subscription(session, userIdentity, forumUuid);
-    subscriptionEventSrc.select(Opened.SELECTOR).fire(subscription);
   }
 
   @OnClose public void onClose(Session session, @PathParam("forumId") String forumUuid) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    logger.info(
-        "Websocket session closed: " + wrapForLogging(userIdentity, forumUuid, session.getId()));
     if (userIdentity == null) {
-      logger.warn("Closing session(" + session.getId() + ") for null userIdentity");
+      logger.warn("Ignoring disconnected session(" + session.getId() + ") for null userIdentity");
+    } else {
+      logger.info(
+          "Websocket session closed: " + wrapForLogging(userIdentity, forumUuid, session.getId()));
+      Subscription subscription = new Subscription(session, userIdentity, forumUuid);
+      subscriptionEventSrc.select(Closed.SELECTOR).fire(subscription);
     }
-    Subscription subscription = new Subscription(session, userIdentity, forumUuid);
-    subscriptionEventSrc.select(Closed.SELECTOR).fire(subscription);
 
   }
 
@@ -62,8 +64,10 @@ public class ForumSocketEndpoint {
       @PathParam("forumId") String forumUuid) throws IOException, EncodeException {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    logger.error("Received Message: " + wrapForLogging(userIdentity, forumUuid, session.getId()) +
-        " with content: " + new ObjectMapper().writeValueAsString(message));
+    if (logger.isTraceEnabled()) {
+      logger.trace("Received Message: " + wrapForLogging(userIdentity, forumUuid, session.getId()) +
+          " with content: " + new ObjectMapper().writeValueAsString(message));
+    }
   }
 
   @OnError public void error(Session session, Throwable t, @PathParam("forumId") String forumUuid) {

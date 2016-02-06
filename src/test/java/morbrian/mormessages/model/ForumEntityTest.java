@@ -46,7 +46,6 @@ public class ForumEntityTest {
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writer().writeValueAsString(sourceForum);
     ForumEntity targetForum = mapper.reader().forType(ForumEntity.class).readValue(json);
-
     verifyEqualityOfAllAttributes("forum-response", sourceForum, targetForum);
   }
 
