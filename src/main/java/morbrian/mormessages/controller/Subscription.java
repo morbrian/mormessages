@@ -3,29 +3,31 @@ package morbrian.mormessages.controller;
 
 import javax.websocket.Session;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Subscription {
-  private Session session;
+  private String subscriptionId;
   private String userIdentity;
   private String topicId;
 
-  public Subscription(Session session, String userIdentity, String topicId) {
-    this.session = session;
+  public Subscription(String subscriptionId, String userIdentity, String topicId) {
+    this.subscriptionId = subscriptionId;
     this.userIdentity = userIdentity;
     this.topicId = topicId;
+  }
+
+  public String getId() {
+    return subscriptionId;
   }
 
   public String getTopicId() {
     return topicId;
   }
 
-  public Session getSession() {
-    return session;
-  }
-
   public String getUserIdentity() {
     return userIdentity;
   }
+
 
   @Override public boolean equals(Object o) {
     if (this == o)
@@ -33,12 +35,12 @@ public class Subscription {
     if (o == null || getClass() != o.getClass())
       return false;
     Subscription that = (Subscription) o;
-    return Objects.equals(getSession(), that.getSession()) &&
+    return Objects.equals(subscriptionId, that.subscriptionId) &&
         Objects.equals(getUserIdentity(), that.getUserIdentity()) &&
         Objects.equals(getTopicId(), that.getTopicId());
   }
 
   @Override public int hashCode() {
-    return Objects.hash(getSession(), getUserIdentity(), getTopicId());
+    return Objects.hash(subscriptionId, getUserIdentity(), getTopicId());
   }
 }

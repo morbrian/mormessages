@@ -2,6 +2,7 @@ package morbrian.mormessages.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.Subscription;
+import morbrian.mormessages.controller.SubscriptionActivator;
 import morbrian.mormessages.event.Closed;
 import morbrian.mormessages.event.Opened;
 import morbrian.mormessages.model.MessageEntity;
@@ -21,66 +22,63 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.security.Principal;
 
-@ServerEndpoint(value = "/api/websocket/forum/{forumId}", encoders = {
+@ServerEndpoint(value = "/api/websocket/{subscriptionId}", encoders = {
     MessageEntityEncoder.class}, decoders = {MessageEntityDecoder.class})
 public class ForumSocketEndpoint {
 
   @Inject private Logger logger;
-  @Inject private Event<Subscription> subscriptionEventSrc;
+  @Inject private Event<SubscriptionActivator> subscriptionEventSrc;
 
   @PostConstruct public void startIntervalNotifier() {
     // anything to do?
   }
 
-  @OnOpen public void onOpen(Session session, @PathParam("forumId") String forumUuid) {
+  @OnOpen public void onOpen(Session session, @PathParam("subscriptionId") String subscriptionId) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    if (userIdentity == null) {
-      // TODO: we don't want unauthenticated users subscribing
-      logger.warn("Ignoring connected session(" + session.getId() + ") for null userIdentity");
+    if (userIdentity == null || userIdentity.equals("anonymous")) {
+      logger.warn("Ignoring connected session(" + session.getId() + ") for " + userIdentity + " userIdentity");
     } else {
-      logger.info("New websocket session opened: " + wrapForLogging(userIdentity, forumUuid,
-          session.getId()));
-      Subscription subscription = new Subscription(session, userIdentity, forumUuid);
-      subscriptionEventSrc.select(Opened.SELECTOR).fire(subscription);
+      if (logger.isDebugEnabled()) {
+        logger.info("New websocket session opened: " + wrapForLogging(session, userIdentity, subscriptionId));
+      }
+      subscriptionEventSrc.select(Opened.SELECTOR).fire(new SubscriptionActivator(session, subscriptionId));
     }
   }
 
-  @OnClose public void onClose(Session session, @PathParam("forumId") String forumUuid) {
+  @OnClose public void onClose(Session session, @PathParam("subscriptionId") String subscriptionId) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
-    if (userIdentity == null) {
-      logger.warn("Ignoring disconnected session(" + session.getId() + ") for null userIdentity");
+    if (userIdentity == null || userIdentity.equals("anonymous")) {
+      logger.warn("Ignoring disconnected session(" + session.getId() + ") for " + userIdentity + " userIdentity");
     } else {
-      logger.info(
-          "Websocket session closed: " + wrapForLogging(userIdentity, forumUuid, session.getId()));
-      Subscription subscription = new Subscription(session, userIdentity, forumUuid);
-      subscriptionEventSrc.select(Closed.SELECTOR).fire(subscription);
+      if (logger.isDebugEnabled()) {
+        logger.info("Websocket session closed: " + wrapForLogging(session, userIdentity, subscriptionId));
+      }
+      subscriptionEventSrc.select(Closed.SELECTOR).fire(new SubscriptionActivator(session, subscriptionId));
     }
-
   }
 
   @OnMessage public void onMessage(Session session, MessageEntity message,
-      @PathParam("forumId") String forumUuid) throws IOException, EncodeException {
+      @PathParam("subscriptionId") String subscriptionId) throws IOException, EncodeException {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     if (logger.isTraceEnabled()) {
-      logger.trace("Received Message: " + wrapForLogging(userIdentity, forumUuid, session.getId()) +
+      logger.trace("Received Message: " + wrapForLogging(session, userIdentity, subscriptionId) +
           " with content: " + new ObjectMapper().writeValueAsString(message));
     }
   }
 
-  @OnError public void error(Session session, Throwable t, @PathParam("forumId") String forumUuid) {
+  @OnError public void error(Session session, Throwable t, @PathParam("subscriptionId") String subscriptionId) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.error(
-        "Web socket error for session: " + wrapForLogging(userIdentity, forumUuid, session.getId()),
-        t);
+        "Web socket error via OnError: " + wrapForLogging(session, userIdentity, subscriptionId));
   }
 
-  private String wrapForLogging(String userIdentity, String forumUuid, String sessionId) {
-    return "principal(" + userIdentity + "), forumId(" + forumUuid + "), sessionId(" + sessionId
-        + ")";
+  private String wrapForLogging(Session session, String userIdentity, String subscriptionId) {
+    return "principal(" + userIdentity + "), sessionId(" + session.getId()
+        + "), subscriptionId(" + subscriptionId + ")";
   }
 
 }
