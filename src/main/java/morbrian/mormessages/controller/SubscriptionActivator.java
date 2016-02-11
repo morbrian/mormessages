@@ -7,7 +7,7 @@ public class SubscriptionActivator {
   private Session session;
   private String subscriptionId;
 
-  public SubscriptionActivator(Session session , String subscriptionId) {
+  public SubscriptionActivator(Session session, String subscriptionId) {
     this.session = session;
     this.subscriptionId = subscriptionId;
   }

@@ -8,26 +8,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.PasswordAuthentication;
 
-/**
- * Created by hikethru08 on 2/5/16.
- */
-public class PasswordAuthenticator  implements ClientRequestFilter {
+public class PasswordAuthenticator implements ClientRequestFilter {
 
   private final PasswordAuthentication credentials;
 
   public PasswordAuthenticator(PasswordAuthentication credentials) {
     this.credentials = credentials;
-  }
-
-  public void filter(ClientRequestContext requestContext) throws IOException {
-    MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-    final String basicAuthentication = getBasicAuthentication();
-    headers.add("Authorization", basicAuthentication);
-
-  }
-
-  private String getBasicAuthentication() {
-    return PasswordAuthenticator.getBasicAuthentication(credentials);
   }
 
   public static String getToken(PasswordAuthentication credentials) {
@@ -41,5 +27,16 @@ public class PasswordAuthenticator  implements ClientRequestFilter {
     } catch (UnsupportedEncodingException ex) {
       throw new IllegalStateException("Cannot encode with UTF-8", ex);
     }
+  }
+
+  public void filter(ClientRequestContext requestContext) throws IOException {
+    MultivaluedMap<String, Object> headers = requestContext.getHeaders();
+    final String basicAuthentication = getBasicAuthentication();
+    headers.add("Authorization", basicAuthentication);
+
+  }
+
+  private String getBasicAuthentication() {
+    return PasswordAuthenticator.getBasicAuthentication(credentials);
   }
 }

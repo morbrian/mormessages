@@ -57,13 +57,13 @@ import static org.junit.Assert.assertEquals;
     assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveAfterCount);
     assertEquals("topic active subscription count", topicActiveBeforeCount, topicActiveAfterCount);
 
-    subscriptionManager.deleteSubscription(subscription.getId());
+    subscriptionManager.deleteSubscription(subscription.getSubscriptionId());
     int totalResetCount = subscriptionManager.getSubscriptionCount();
     int topicResetCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
     int userResetCount = subscriptionManager.getSubscriptionCountForUsername(username);
     int totalActiveResetCount = subscriptionManager.getActiveSubscriptionCount();
     int topicActiveResetCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
-    assertEquals("total subscription count", totalBeforeCount , totalResetCount);
+    assertEquals("total subscription count", totalBeforeCount, totalResetCount);
     assertEquals("topic subscription count", topicBeforeCount, topicResetCount);
     assertEquals("user subscription count", userBeforeCount, userResetCount);
     assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveResetCount);
@@ -85,7 +85,7 @@ import static org.junit.Assert.assertEquals;
     assertEquals("subscrption topic", forumUuid, subscription.getTopicId());
 
     Session mockSession = new MockSession();
-    subscriptionManager.activateSubscription(mockSession, subscription.getId());
+    subscriptionManager.activateSubscription(mockSession, subscription.getSubscriptionId());
     int totalAfterCount = subscriptionManager.getSubscriptionCount();
     int topicAfterCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
     int userAfterCount = subscriptionManager.getSubscriptionCountForUsername(username);
@@ -95,16 +95,18 @@ import static org.junit.Assert.assertEquals;
     assertEquals("total subscription count", totalBeforeCount + 1, totalAfterCount);
     assertEquals("topic subscription count", topicBeforeCount + 1, topicAfterCount);
     assertEquals("user subscription count", userBeforeCount + 1, userAfterCount);
-    assertEquals("total active subscription count", totalActiveBeforeCount + 1, totalActiveAfterCount);
-    assertEquals("topic active subscription count", topicActiveBeforeCount + 1, topicActiveAfterCount);
+    assertEquals("total active subscription count", totalActiveBeforeCount + 1,
+        totalActiveAfterCount);
+    assertEquals("topic active subscription count", topicActiveBeforeCount + 1,
+        topicActiveAfterCount);
 
-    subscriptionManager.deleteSubscription(subscription.getId());
+    subscriptionManager.deleteSubscription(subscription.getSubscriptionId());
     int totalResetCount = subscriptionManager.getSubscriptionCount();
     int topicResetCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
     int userResetCount = subscriptionManager.getSubscriptionCountForUsername(username);
     int totalActiveResetCount = subscriptionManager.getActiveSubscriptionCount();
     int topicActiveResetCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
-    assertEquals("total subscription count", totalBeforeCount , totalResetCount);
+    assertEquals("total subscription count", totalBeforeCount, totalResetCount);
     assertEquals("topic subscription count", topicBeforeCount, topicResetCount);
     assertEquals("user subscription count", userBeforeCount, userResetCount);
     assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveResetCount);

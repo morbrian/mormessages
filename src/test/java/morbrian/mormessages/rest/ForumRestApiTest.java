@@ -237,7 +237,8 @@ import static org.junit.Assert.assertNull;
     assertEquals("message.forumId", submittedMessage.getForumUuid(), createdMessage.getForumUuid());
 
     // verify the created by matches our user
-    assertEquals("message.createdBy", configProvider.getUsername(), createdMessage.getCreatedByUid());
+    assertEquals("message.createdBy", configProvider.getUsername(),
+        createdMessage.getCreatedByUid());
 
     // verify the forum data we recieved back matches database
     MessageEntityTest.verifyEqualityOfAllAttributes("message", createdMessage, responseMessage);

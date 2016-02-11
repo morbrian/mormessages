@@ -16,28 +16,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @ApplicationScoped public class SubscriptionManager {
 
+  public static final long DEFAULT_DURATION_SECONDS = 60 * 5;
+
   @Inject private Logger logger;
 
-  private Map<String, Subscription> idToSubscription =
-      Collections.synchronizedMap(new HashMap<>());
+  private Map<String, Subscription> idToSubscription = Collections.synchronizedMap(new HashMap<>());
   private Map<String, Set<Subscription>> topicToSubscription =
       Collections.synchronizedMap(new HashMap<>());
   private Map<String, Set<Subscription>> userToSubscription =
       Collections.synchronizedMap(new HashMap<>());
 
   // these are mapped when subscription is active
-  private Map<String, Set<Session>> topicToSession =
-      Collections.synchronizedMap(new HashMap<>());
+  private Map<String, Set<Session>> topicToSession = Collections.synchronizedMap(new HashMap<>());
   //TODO: we should probably permit multiple subscriptions per session
   //TODO: and we should probably have an envelope class concept
   private Map<String, Subscription> sessionToSubscription =
       Collections.synchronizedMap(new HashMap<>());
-  private Map<String, Session> subscriptionToSession =
-      Collections.synchronizedMap(new HashMap<>());
+  private Map<String, Session> subscriptionToSession = Collections.synchronizedMap(new HashMap<>());
 
   public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator) {
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
@@ -52,7 +50,7 @@ import java.util.stream.Collectors;
     if (sessionSet == null) {
       return Collections.emptyList();
     } else {
-      return new ArrayList(sessionSet);
+      return new ArrayList<>(sessionSet);
     }
   }
 
@@ -143,6 +141,19 @@ import java.util.stream.Collectors;
     }
   }
 
+  public List<Subscription> listSubscriptions(String username) {
+    Set<Subscription> subscriptions = userToSubscription.get(username);
+    if (subscriptions != null) {
+      return new ArrayList<>(subscriptions);
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+  public Subscription getSubscription(String subscriptionId) {
+    return idToSubscription.get(subscriptionId);
+  }
+
   public int getSubscriptionCount() {
     return idToSubscription.size();
   }
@@ -158,7 +169,7 @@ import java.util.stream.Collectors;
   }
 
   public int getActiveSubscriptionCount() {
-    assert(subscriptionToSession.size() == sessionToSubscription.size());
+    assert (subscriptionToSession.size() == sessionToSubscription.size());
     return subscriptionToSession.size();
   }
 

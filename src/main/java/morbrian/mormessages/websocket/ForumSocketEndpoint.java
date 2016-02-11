@@ -1,7 +1,6 @@
 package morbrian.mormessages.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import morbrian.mormessages.controller.Subscription;
 import morbrian.mormessages.controller.SubscriptionActivator;
 import morbrian.mormessages.event.Closed;
 import morbrian.mormessages.event.Opened;
@@ -37,25 +36,32 @@ public class ForumSocketEndpoint {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     if (userIdentity == null || userIdentity.equals("anonymous")) {
-      logger.warn("Ignoring connected session(" + session.getId() + ") for " + userIdentity + " userIdentity");
+      logger.warn("Ignoring connected session(" + session.getId() + ") for " + userIdentity
+          + " userIdentity");
     } else {
       if (logger.isDebugEnabled()) {
-        logger.info("New websocket session opened: " + wrapForLogging(session, userIdentity, subscriptionId));
+        logger.info("New websocket session opened: " + wrapForLogging(session, userIdentity,
+            subscriptionId));
       }
-      subscriptionEventSrc.select(Opened.SELECTOR).fire(new SubscriptionActivator(session, subscriptionId));
+      subscriptionEventSrc.select(Opened.SELECTOR)
+          .fire(new SubscriptionActivator(session, subscriptionId));
     }
   }
 
-  @OnClose public void onClose(Session session, @PathParam("subscriptionId") String subscriptionId) {
+  @OnClose
+  public void onClose(Session session, @PathParam("subscriptionId") String subscriptionId) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     if (userIdentity == null || userIdentity.equals("anonymous")) {
-      logger.warn("Ignoring disconnected session(" + session.getId() + ") for " + userIdentity + " userIdentity");
+      logger.warn("Ignoring disconnected session(" + session.getId() + ") for " + userIdentity
+          + " userIdentity");
     } else {
       if (logger.isDebugEnabled()) {
-        logger.info("Websocket session closed: " + wrapForLogging(session, userIdentity, subscriptionId));
+        logger.info(
+            "Websocket session closed: " + wrapForLogging(session, userIdentity, subscriptionId));
       }
-      subscriptionEventSrc.select(Closed.SELECTOR).fire(new SubscriptionActivator(session, subscriptionId));
+      subscriptionEventSrc.select(Closed.SELECTOR)
+          .fire(new SubscriptionActivator(session, subscriptionId));
     }
   }
 
@@ -69,7 +75,8 @@ public class ForumSocketEndpoint {
     }
   }
 
-  @OnError public void error(Session session, Throwable t, @PathParam("subscriptionId") String subscriptionId) {
+  @OnError public void error(Session session, Throwable t,
+      @PathParam("subscriptionId") String subscriptionId) {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.error(
@@ -77,8 +84,8 @@ public class ForumSocketEndpoint {
   }
 
   private String wrapForLogging(Session session, String userIdentity, String subscriptionId) {
-    return "principal(" + userIdentity + "), sessionId(" + session.getId()
-        + "), subscriptionId(" + subscriptionId + ")";
+    return "principal(" + userIdentity + "), sessionId(" + session.getId() + "), subscriptionId("
+        + subscriptionId + ")";
   }
 
 }

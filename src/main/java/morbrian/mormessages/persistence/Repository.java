@@ -57,8 +57,7 @@ import java.util.List;
       Integer resultSize, Calendar greaterThan) {
     //noinspection unchecked
     return em.createNamedQuery(MessageEntity.FIND_ALL_IN_FORUM_WHERE_MODIFIED_GREATER_THAN)
-        .setParameter("forumUuid", forumUuid)
-        .setParameter("modifiedTime",
+        .setParameter("forumUuid", forumUuid).setParameter("modifiedTime",
             (greaterThan != null) ? greaterThan : DEFAULT_QUERY_GREATER_THAN)
         .setFirstResult((offset != null) ? offset : DEFAULT_QUERY_OFFSET)
         .setMaxResults((resultSize != null) ? resultSize : DEFAULT_RESULT_SIZE).getResultList();

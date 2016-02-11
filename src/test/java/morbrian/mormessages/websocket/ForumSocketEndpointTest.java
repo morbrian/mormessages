@@ -91,9 +91,8 @@ import static org.junit.Assert.assertNotNull;
   @Test public void testSubscribeUnsubscribe() throws Exception {
 
     Map<String, List<String>> headers = new HashMap<>();
-    headers.put("Authorization",
-        Collections.singletonList(
-            PasswordAuthenticator.getBasicAuthentication(configProvider.getPasswordAuthentication())));
+    headers.put("Authorization", Collections.singletonList(
+        PasswordAuthenticator.getBasicAuthentication(configProvider.getPasswordAuthentication())));
 
     WebSocketContainer container = ContainerProvider.getWebSocketContainer();
     ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().build();

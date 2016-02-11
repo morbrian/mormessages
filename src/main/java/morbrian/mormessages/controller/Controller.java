@@ -33,4 +33,9 @@ public interface Controller {
 
   MessageEntity postMessageToForum(MessageEntity message, String forumUuid);
 
+  List<Subscription> listSubscriptions();
+
+  Subscription getSubscription(String subscriptionId);
+
+  void deleteSubscription(String subscriptionId);
 }
