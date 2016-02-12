@@ -12,7 +12,6 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -92,30 +91,4 @@ import java.util.List;
     return createdMessage;
   }
 
-  @Override public List<Subscription> listSubscriptions() {
-    List<Subscription> subscriptions = subscriptionManager.listSubscriptions(principal.getName());
-    if (subscriptions == null) {
-      return new ArrayList<>();
-    } else {
-      return subscriptions;
-    }
-  }
-
-  @Override public Subscription getSubscription(String subscriptionId) {
-    Subscription subscription = subscriptionManager.getSubscription(subscriptionId);
-    if (subscription == null) {
-      return null;
-    } else if (!subscription.getUserIdentity().equals(principal.getName())) {
-      logger.warn(
-          "User(" + principal.getName() + ") requested view of subscription(" + subscriptionId + ")"
-              + " belonging to another user(" + subscription.getUserIdentity());
-      return null;
-    } else {
-      return subscription;
-    }
-  }
-
-  @Override public void deleteSubscription(String subscriptionId) {
-    subscriptionManager.deleteSubscription(subscriptionId);
-  }
 }

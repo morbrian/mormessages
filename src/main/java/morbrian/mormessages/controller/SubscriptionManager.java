@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.websocket.Session;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
   public static final long DEFAULT_DURATION_SECONDS = 60 * 5;
 
+  @Inject private Principal principal;
   @Inject private Logger logger;
 
   private Map<String, Subscription> idToSubscription = Collections.synchronizedMap(new HashMap<>());
@@ -76,7 +78,23 @@ import java.util.UUID;
     String subscriptionId = UUID.randomUUID().toString();
 
     // create new subscription object with id
-    Subscription subscription = new Subscription(subscriptionId, userId, topicId);
+    Subscription subscription = new Subscription(userId, topicId, subscriptionId);
+    storeSubscription(subscription);
+    return subscription;
+  }
+
+  public synchronized Subscription renewSubscription(Subscription subscription) {
+    String subscriptionId = subscription.getSubscriptionId();
+    Subscription storedSubscription = getSubscription(subscriptionId);
+    deleteSubscription(subscriptionId);
+    storeSubscription(storedSubscription.renew(subscription.getDuration()));
+    return subscription;
+  }
+
+  private synchronized void storeSubscription(Subscription subscription) {
+    String subscriptionId = subscription.getSubscriptionId();
+    String topicId = subscription.getTopicId();
+    String userId = subscription.getUserIdentity();
 
     // map by subscription-id
     idToSubscription.put(subscriptionId, subscription);
@@ -96,8 +114,6 @@ import java.util.UUID;
       userToSubscription.put(userId, userTopics);
     }
     userTopics.add(subscription);
-
-    return subscription;
   }
 
   public synchronized void deactivateSubscription(Session session, String subscriptionId) {
@@ -151,7 +167,17 @@ import java.util.UUID;
   }
 
   public Subscription getSubscription(String subscriptionId) {
-    return idToSubscription.get(subscriptionId);
+    Subscription subscription = idToSubscription.get(subscriptionId);
+    String username = (principal != null) ? principal.getName() : null;
+    if (subscription == null) {
+      return null;
+    } else if (!subscription.getUserIdentity().equals(username)) {
+      logger.warn("User(" + username + ") requested view of subscription(" + subscriptionId + ")"
+          + " belonging to another user(" + subscription.getUserIdentity() + ")");
+      return null;
+    } else {
+      return subscription;
+    }
   }
 
   public int getSubscriptionCount() {

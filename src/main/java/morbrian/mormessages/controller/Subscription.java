@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true) public class Subscription {
   private String subscriptionId;
@@ -23,7 +24,7 @@ import java.util.Objects;
   private Calendar expirationTime;
   private Duration duration;
 
-  public Subscription(String subscriptionId, String userIdentity, String topicId) {
+  public Subscription(String userIdentity, String topicId, String subscriptionId) {
     this.subscriptionId = subscriptionId;
     this.userIdentity = userIdentity;
     this.topicId = topicId;
@@ -32,9 +33,12 @@ import java.util.Objects;
     this.expirationTime.setTime(Date.from(Instant.now().plusSeconds(duration.getSeconds())));
   }
 
-  public Subscription(String subscriptionId, String userIdentity, String topicId,
-      Calendar expirationTime) {
-    this(subscriptionId, userIdentity, topicId);
+  public Subscription(String userIdentity, String topicId) {
+    this(userIdentity, topicId, UUID.randomUUID().toString());
+  }
+
+  public Subscription(String userIdentity, String topicId, Calendar expirationTime) {
+    this(userIdentity, topicId);
     if (expirationTime != null) {
       this.expirationTime = expirationTime;
       this.duration =
@@ -42,9 +46,8 @@ import java.util.Objects;
     }
   }
 
-  public Subscription(String subscriptionId, String userIdentity, String topicId,
-      Duration duration) {
-    this(subscriptionId, userIdentity, topicId);
+  public Subscription(String userIdentity, String topicId, Duration duration) {
+    this(userIdentity, topicId);
     if (duration != null) {
       this.duration = duration;
       this.expirationTime = Calendar.getInstance();
@@ -52,9 +55,8 @@ import java.util.Objects;
     }
   }
 
-  public Subscription(String subscriptionId, String userIdentity, String topicId,
-      Calendar expiration, Duration duration) {
-    this(subscriptionId, userIdentity, topicId);
+  public Subscription(String userIdentity, String topicId, Calendar expiration, Duration duration) {
+    this(userIdentity, topicId);
     this.duration = duration;
     this.expirationTime = expiration;
   }
@@ -65,8 +67,10 @@ import java.util.Objects;
       @JsonProperty(value = "topicId") String topicId,
       @JsonProperty(value = "durationMillis") long durationMillis,
       @JsonProperty(value = "expiration") Calendar expiration) {
-    return new Subscription(subscriptionId, userIdentity, topicId, expiration,
-        Duration.ofMillis(durationMillis));
+    Subscription subscription =
+        new Subscription(userIdentity, topicId, expiration, Duration.ofMillis(durationMillis));
+    subscription.subscriptionId = subscriptionId;
+    return subscription;
   }
 
   public String getSubscriptionId() {
@@ -79,6 +83,12 @@ import java.util.Objects;
 
   public String getUserIdentity() {
     return userIdentity;
+  }
+
+  public Subscription renew(Duration duration) {
+    Subscription extended = new Subscription(userIdentity, topicId, duration);
+    extended.subscriptionId = this.subscriptionId;
+    return extended;
   }
 
   @JsonSerialize(using = CalendarSerializer.class)

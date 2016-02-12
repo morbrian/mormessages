@@ -17,8 +17,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
+import javax.ejb.EJBException;
 import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -92,7 +92,7 @@ import static org.junit.Assert.*;
       throws JsonProcessingException {
     MessageEntity expectedMessage =
         MessageEntityTest.createRandomNewMessage(UUID.randomUUID().toString());
-    exception.expect(PersistenceException.class);
+    exception.expect(EJBException.class);
     persistence.createMessage(expectedMessage);
   }
 
