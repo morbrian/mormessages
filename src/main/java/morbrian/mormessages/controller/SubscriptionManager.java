@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped public class SubscriptionManager {
 
@@ -41,11 +42,18 @@ import java.util.UUID;
 
   public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
       throws SubscriptionNotFoundException {
+    purgeStaleSubscriptions();
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
 
   public void onClosedSubscription(@Observes @Closed final SubscriptionActivator activator) {
+    purgeStaleSubscriptions();
     deactivateSubscription(activator.getSession(), activator.getSubscriptionId());
+  }
+
+  public void purgeStaleSubscriptions() {
+    idToSubscription.values().stream().filter(Subscription::isExpired)
+        .map(Subscription::getSubscriptionId).forEach(this::deleteSubscription);
   }
 
   public synchronized List<Session> sessionsForTopic(String topicId) {

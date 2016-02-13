@@ -28,8 +28,7 @@ import java.security.Principal;
 public class ForumSocketEndpoint {
 
   @Inject private Logger logger;
-  //@Inject private Event<SubscriptionActivator> subscriptionEventSrc;
-  @Inject private SubscriptionManager subscriptionManager;
+  @Inject private Event<SubscriptionActivator> subscriptionEventSrc;
 
   @PostConstruct public void startIntervalNotifier() {
     // anything to do?
@@ -37,8 +36,8 @@ public class ForumSocketEndpoint {
 
   @OnOpen public void onOpen(Session session, @PathParam("subscriptionId") String subscriptionId)
       throws SubscriptionNotFoundException {
-    subscriptionManager.activateSubscription(session, subscriptionId);
-
+    subscriptionEventSrc.select(Opened.SELECTOR)
+        .fire(new SubscriptionActivator(session, subscriptionId));
     //TODO: this will need to be fixed, but for now the subsciptionId is as good as a cookie
     //TODO: only the user requesting it will know what it is, but later want to add a
     //TODO: more specific user authentication handshake before trusting the session
@@ -61,7 +60,8 @@ public class ForumSocketEndpoint {
 
   @OnClose
   public void onClose(Session session, @PathParam("subscriptionId") String subscriptionId) {
-    subscriptionManager.deactivateSubscription(session, subscriptionId);
+      subscriptionEventSrc.select(Closed.SELECTOR)
+          .fire(new SubscriptionActivator(session, subscriptionId));
 //    Principal principal = session.getUserPrincipal();
 //    String userIdentity = ((principal != null) ? principal.getName() : null);
 //    if (userIdentity == null || userIdentity.equals("anonymous")) {

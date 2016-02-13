@@ -96,6 +96,10 @@ import java.util.UUID;
     return expirationTime;
   }
 
+  public boolean isExpired() {
+    return expirationTime.getTimeInMillis() < System.currentTimeMillis();
+  }
+
   @JsonSerialize(using = DurationAsLongMillisSerializer.class)
   @JsonProperty(value = "durationMillis") public Duration getDuration() {
     return duration;
