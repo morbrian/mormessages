@@ -70,7 +70,7 @@ import static org.junit.Assert.assertEquals;
     assertEquals("topic active subscription count", topicActiveBeforeCount, topicActiveResetCount);
   }
 
-  @Test public void shouldCreateDeleteActiveSubscription() {
+  @Test public void shouldCreateDeleteActiveSubscription() throws SubscriptionNotFoundException {
     String forumUuid = UUID.randomUUID().toString();
     String username = configProvider.getUsername();
 

@@ -2,6 +2,8 @@ package morbrian.mormessages.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.SubscriptionActivator;
+import morbrian.mormessages.controller.SubscriptionManager;
+import morbrian.mormessages.controller.SubscriptionNotFoundException;
 import morbrian.mormessages.event.Closed;
 import morbrian.mormessages.event.Opened;
 import morbrian.mormessages.model.MessageEntity;
@@ -26,43 +28,53 @@ import java.security.Principal;
 public class ForumSocketEndpoint {
 
   @Inject private Logger logger;
-  @Inject private Event<SubscriptionActivator> subscriptionEventSrc;
+  //@Inject private Event<SubscriptionActivator> subscriptionEventSrc;
+  @Inject private SubscriptionManager subscriptionManager;
 
   @PostConstruct public void startIntervalNotifier() {
     // anything to do?
   }
 
-  @OnOpen public void onOpen(Session session, @PathParam("subscriptionId") String subscriptionId) {
-    Principal principal = session.getUserPrincipal();
-    String userIdentity = ((principal != null) ? principal.getName() : null);
-    if (userIdentity == null || userIdentity.equals("anonymous")) {
-      logger.warn("Ignoring connected session(" + session.getId() + ") for " + userIdentity
-          + " userIdentity");
-    } else {
-      if (logger.isDebugEnabled()) {
-        logger.info("New websocket session opened: " + wrapForLogging(session, userIdentity,
-            subscriptionId));
-      }
-      subscriptionEventSrc.select(Opened.SELECTOR)
-          .fire(new SubscriptionActivator(session, subscriptionId));
-    }
+  @OnOpen public void onOpen(Session session, @PathParam("subscriptionId") String subscriptionId)
+      throws SubscriptionNotFoundException {
+    subscriptionManager.activateSubscription(session, subscriptionId);
+
+    //TODO: this will need to be fixed, but for now the subsciptionId is as good as a cookie
+    //TODO: only the user requesting it will know what it is, but later want to add a
+    //TODO: more specific user authentication handshake before trusting the session
+    //TODO: ALSO: i think the tests are not including the web.xml correctly,
+    //TODO: which is a separate issue, but something that interferes with testing
+//    Principal principal = session.getUserPrincipal();
+//    String userIdentity = ((principal != null) ? principal.getName() : null);
+//    if (userIdentity == null || userIdentity.equals("anonymous")) {
+//      logger.warn("Ignoring connected session(" + session.getId() + ") for " + userIdentity
+//          + " userIdentity");
+//    } else {
+//      if (logger.isDebugEnabled()) {
+//        logger.info("New websocket session opened: " + wrapForLogging(session, userIdentity,
+//            subscriptionId));
+//      }
+//      subscriptionEventSrc.select(Opened.SELECTOR)
+//          .fire(new SubscriptionActivator(session, subscriptionId));
+//    }
   }
 
   @OnClose
   public void onClose(Session session, @PathParam("subscriptionId") String subscriptionId) {
-    Principal principal = session.getUserPrincipal();
-    String userIdentity = ((principal != null) ? principal.getName() : null);
-    if (userIdentity == null || userIdentity.equals("anonymous")) {
-      logger.warn("Ignoring disconnected session(" + session.getId() + ") for " + userIdentity
-          + " userIdentity");
-    } else {
-      if (logger.isDebugEnabled()) {
-        logger.info(
-            "Websocket session closed: " + wrapForLogging(session, userIdentity, subscriptionId));
-      }
-      subscriptionEventSrc.select(Closed.SELECTOR)
-          .fire(new SubscriptionActivator(session, subscriptionId));
-    }
+    subscriptionManager.deactivateSubscription(session, subscriptionId);
+//    Principal principal = session.getUserPrincipal();
+//    String userIdentity = ((principal != null) ? principal.getName() : null);
+//    if (userIdentity == null || userIdentity.equals("anonymous")) {
+//      logger.warn("Ignoring disconnected session(" + session.getId() + ") for " + userIdentity
+//          + " userIdentity");
+//    } else {
+//      if (logger.isDebugEnabled()) {
+//        logger.info(
+//            "Websocket session closed: " + wrapForLogging(session, userIdentity, subscriptionId));
+//      }
+//      subscriptionEventSrc.select(Closed.SELECTOR)
+//          .fire(new SubscriptionActivator(session, subscriptionId));
+//    }
   }
 
   @OnMessage public void onMessage(Session session, MessageEntity message,
@@ -80,7 +92,7 @@ public class ForumSocketEndpoint {
     Principal principal = session.getUserPrincipal();
     String userIdentity = ((principal != null) ? principal.getName() : null);
     logger.error(
-        "Web socket error via OnError: " + wrapForLogging(session, userIdentity, subscriptionId));
+        "Web socket error via OnError: " + wrapForLogging(session, userIdentity, subscriptionId), t);
   }
 
   private String wrapForLogging(Session session, String userIdentity, String subscriptionId) {

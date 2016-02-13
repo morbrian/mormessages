@@ -39,7 +39,8 @@ import java.util.UUID;
       Collections.synchronizedMap(new HashMap<>());
   private Map<String, Session> subscriptionToSession = Collections.synchronizedMap(new HashMap<>());
 
-  public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator) {
+  public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
+      throws SubscriptionNotFoundException {
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
 
@@ -56,9 +57,13 @@ import java.util.UUID;
     }
   }
 
-  public synchronized void activateSubscription(Session session, String subscriptionId) {
+  public synchronized void activateSubscription(Session session, String subscriptionId)
+      throws SubscriptionNotFoundException {
     String sessionId = session.getId();
     Subscription subscription = idToSubscription.get(subscriptionId);
+    if (subscription == null) {
+      throw new SubscriptionNotFoundException(subscriptionId);
+    }
     String topicId = subscription.getTopicId();
 
     // map session by topicId - one-to-one
