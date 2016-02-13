@@ -42,6 +42,9 @@ import java.util.stream.Collectors;
 
   public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
       throws SubscriptionNotFoundException {
+    Subscription subscription = idToSubscription.get(activator.getSubscriptionId());
+    logger.info("(activate-subscription) user(" + subscription.getUserIdentity() + ")"
+        + ", topicId(" + subscription.getTopicId() + ")");
     purgeStaleSubscriptions();
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
