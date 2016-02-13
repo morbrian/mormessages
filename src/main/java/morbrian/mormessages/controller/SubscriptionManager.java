@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped public class SubscriptionManager {
 
-  public static final long DEFAULT_DURATION_SECONDS = 60 * 5;
+  public static final long DEFAULT_DURATION_SECONDS = 60 * 60;
 
   @Inject private Principal principal;
   @Inject private Logger logger;
