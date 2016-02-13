@@ -8,10 +8,13 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 import java.security.Principal;
 
 @Stateless public class Persistence {
   @Inject private Logger logger;
+  @Inject private Repository repository;
   @Inject private Principal principal;
   @Inject private EntityManager em;
 
@@ -47,7 +50,14 @@ import java.security.Principal;
   }
 
   public MessageEntity createMessage(MessageEntity entity) {
-    return (MessageEntity) createEntity(entity);
+    // TODO: this is basically a constraint check until i fix the orm schema
+    try {
+      repository.findForumByUuid(entity.getForumUuid());
+      return (MessageEntity) createEntity(entity);
+    } catch (NoResultException exc) {
+      throw new PersistenceException("created message cannot be created for nonexistant forum",
+          exc);
+    }
   }
 
 }

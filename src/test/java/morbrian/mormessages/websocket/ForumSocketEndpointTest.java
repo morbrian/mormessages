@@ -2,6 +2,7 @@ package morbrian.mormessages.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import morbrian.mormessages.controller.Controller;
+import morbrian.mormessages.controller.Subscription;
 import morbrian.mormessages.controller.SubscriptionManager;
 import morbrian.mormessages.model.Credentials;
 import morbrian.mormessages.model.ForumEntity;
@@ -37,6 +38,9 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.PasswordAuthentication;
 import java.net.URI;
@@ -55,7 +59,7 @@ import static org.junit.Assert.assertNotNull;
   private static final ContainerConfigurationProvider configProvider =
       new ContainerConfigurationProvider();
   private static final String AUTH_REST_PATH = "api/rest/auth/";
-  private static final String FORUM_SOCKET_PATH = "api/websocket/forum";
+  private static final String FORUM_SOCKET_PATH = "api/websocket/";
   private static Logger logger = LoggerFactory.getLogger(ForumRestApi.class);
   // static data holders for testing messages
   private static MessageEntity receivedMessageClient1;
@@ -64,6 +68,7 @@ import static org.junit.Assert.assertNotNull;
   @Inject private SubscriptionManager subscriptionManager;
   @ArquillianResource private URL webappUrl;
   private SimpleClient client;
+  private String cookie;
 
   @Deployment public static Archive<?> createDeployment() {
     return configProvider.createDeployment();
@@ -76,7 +81,9 @@ import static org.junit.Assert.assertNotNull;
 
   @Before public void setup() {
     client = new SimpleClient(webappUrl.toString(), configProvider.getPasswordAuthentication());
-    client.post(getCredentials(), Arrays.asList(AUTH_REST_PATH, "login"), null).close();
+    Response response = client.post(getCredentials(), Arrays.asList(AUTH_REST_PATH, "login"), null);
+    cookie = response.getStringHeaders().get("Set-Cookie").get(0);
+    response.close();
     receivedMessageClient1 = null;
   }
 
@@ -85,15 +92,15 @@ import static org.junit.Assert.assertNotNull;
     for (ForumEntity forum : controller.listForums()) {
       controller.deleteForum(forum.getUuid());
     }
+    cookie = null;
     receivedMessageClient1 = null;
   }
 
-  @Test public void testSubscribeUnsubscribe() throws Exception {
-
+  @Test public void testActivateDeactivate() throws Exception {
     Map<String, List<String>> headers = new HashMap<>();
-    headers.put("Authorization",
-        Collections.singletonList(
-            PasswordAuthenticator.getBasicAuthentication(configProvider.getPasswordAuthentication())));
+    headers.put("Authorization", Collections.singletonList(
+        PasswordAuthenticator.getBasicAuthentication(configProvider.getPasswordAuthentication())));
+    headers.put("Cookie", Collections.singletonList(cookie));
 
     WebSocketContainer container = ContainerProvider.getWebSocketContainer();
     ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().build();
@@ -102,14 +109,19 @@ import static org.junit.Assert.assertNotNull;
       @Override public void onOpen(Session session, EndpointConfig config) {
         // nothing to do
       }
+      @Override public void onError(Session session, Throwable thr) {
+        logger.error("Error received by websocket client endpoint", thr);
+      }
     };
 
     String forumUuid = UUID.randomUUID().toString();
+    Subscription subscription = subscriptionManager.createSubscription(forumUuid, configProvider.getUsername());
     int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
     URI uri =
-        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(subscription.getSubscriptionId())
             .userInfo(PasswordAuthenticator.getToken(configProvider.getPasswordAuthentication()))
             .build();
+    logger.info("connecting to: " + uri);
     Session session = container.connectToServer(client1, configuration, uri);
 
     Thread.sleep(2000);
@@ -145,8 +157,10 @@ import static org.junit.Assert.assertNotNull;
       }
     };
 
+
+    Subscription subscription = subscriptionManager.createSubscription(forumUuid, configProvider.getUsername());
     URI uri =
-        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(forumUuid)
+        UriBuilder.fromUri(webappUrl.toURI()).scheme("ws").path(FORUM_SOCKET_PATH).path(subscription.getSubscriptionId())
             .build();
     container.connectToServer(client1, configuration, uri);
 

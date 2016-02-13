@@ -32,21 +32,84 @@ import static org.junit.Assert.assertEquals;
     provisioner.setup();
   }
 
-  @Test public void testSubscribeUnsubscribe() {
+  @Test public void shouldCreateDeleteInactiveSubscription() {
     String forumUuid = UUID.randomUUID().toString();
-    Session mockSession = new MockSession();
-    String sessionId = mockSession.getId();
+    String username = configProvider.getUsername();
 
-    Subscription sampleSubscription = new Subscription(mockSession, "nobody", forumUuid);
-    int preSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
+    int totalBeforeCount = subscriptionManager.getSubscriptionCount();
+    int topicBeforeCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+    int userBeforeCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveBeforeCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveBeforeCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
 
-    subscriptionManager.subscribe(sampleSubscription);
-    int postSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
-    assertEquals("subscribed session count", preSessionCount + 1, postSessionCount);
+    Subscription subscription = subscriptionManager.createSubscription(forumUuid, username);
+    assertEquals("subscription username", username, subscription.getUserIdentity());
+    assertEquals("subscrption topic", forumUuid, subscription.getTopicId());
+    int totalAfterCount = subscriptionManager.getSubscriptionCount();
+    int topicAfterCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
+    int userAfterCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveAfterCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveAfterCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
 
-    subscriptionManager.unsubscribe(sampleSubscription);
-    int closedSessionCount = subscriptionManager.sessionsForTopic(forumUuid).size();
-    assertEquals("unsubscribed session count", preSessionCount, closedSessionCount);
+    assertEquals("total subscription count", totalBeforeCount + 1, totalAfterCount);
+    assertEquals("topic subscription count", topicBeforeCount + 1, topicAfterCount);
+    assertEquals("user subscription count", userBeforeCount + 1, userAfterCount);
+    assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveAfterCount);
+    assertEquals("topic active subscription count", topicActiveBeforeCount, topicActiveAfterCount);
+
+    subscriptionManager.deleteSubscription(subscription.getSubscriptionId());
+    int totalResetCount = subscriptionManager.getSubscriptionCount();
+    int topicResetCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
+    int userResetCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveResetCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveResetCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+    assertEquals("total subscription count", totalBeforeCount, totalResetCount);
+    assertEquals("topic subscription count", topicBeforeCount, topicResetCount);
+    assertEquals("user subscription count", userBeforeCount, userResetCount);
+    assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveResetCount);
+    assertEquals("topic active subscription count", topicActiveBeforeCount, topicActiveResetCount);
   }
 
+  @Test public void shouldCreateDeleteActiveSubscription() throws SubscriptionNotFoundException {
+    String forumUuid = UUID.randomUUID().toString();
+    String username = configProvider.getUsername();
+
+    int totalBeforeCount = subscriptionManager.getSubscriptionCount();
+    int topicBeforeCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+    int userBeforeCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveBeforeCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveBeforeCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+
+    Subscription subscription = subscriptionManager.createSubscription(forumUuid, username);
+    assertEquals("subscription username", username, subscription.getUserIdentity());
+    assertEquals("subscrption topic", forumUuid, subscription.getTopicId());
+
+    Session mockSession = new MockSession();
+    subscriptionManager.activateSubscription(mockSession, subscription.getSubscriptionId());
+    int totalAfterCount = subscriptionManager.getSubscriptionCount();
+    int topicAfterCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
+    int userAfterCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveAfterCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveAfterCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+
+    assertEquals("total subscription count", totalBeforeCount + 1, totalAfterCount);
+    assertEquals("topic subscription count", topicBeforeCount + 1, topicAfterCount);
+    assertEquals("user subscription count", userBeforeCount + 1, userAfterCount);
+    assertEquals("total active subscription count", totalActiveBeforeCount + 1,
+        totalActiveAfterCount);
+    assertEquals("topic active subscription count", topicActiveBeforeCount + 1,
+        topicActiveAfterCount);
+
+    subscriptionManager.deleteSubscription(subscription.getSubscriptionId());
+    int totalResetCount = subscriptionManager.getSubscriptionCount();
+    int topicResetCount = subscriptionManager.getSubscriptionCountForTopic(forumUuid);
+    int userResetCount = subscriptionManager.getSubscriptionCountForUsername(username);
+    int totalActiveResetCount = subscriptionManager.getActiveSubscriptionCount();
+    int topicActiveResetCount = subscriptionManager.getActiveSubscriptionCountForTopic(forumUuid);
+    assertEquals("total subscription count", totalBeforeCount, totalResetCount);
+    assertEquals("topic subscription count", topicBeforeCount, topicResetCount);
+    assertEquals("user subscription count", userBeforeCount, userResetCount);
+    assertEquals("total active subscription count", totalActiveBeforeCount, totalActiveResetCount);
+    assertEquals("topic active subscription count", topicActiveBeforeCount, topicActiveResetCount);
+  }
 }

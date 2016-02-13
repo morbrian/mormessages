@@ -21,6 +21,7 @@ import java.util.List;
   @Inject private Repository repository;
   @Inject private Principal principal;
   @Inject private Event<MessageEntity> messageEventSrc;
+  @Inject private SubscriptionManager subscriptionManager;
   @Inject private Logger logger;
 
   @Override public List<ForumEntity> listForums() {

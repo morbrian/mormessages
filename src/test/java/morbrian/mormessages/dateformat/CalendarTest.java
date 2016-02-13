@@ -13,13 +13,11 @@ import java.util.Calendar;
 
 public class CalendarTest {
 
-  @Test
-  public void shouldSerializeDeserialize() throws IOException, ParseException {
+  @Test public void shouldSerializeDeserialize() throws IOException, ParseException {
     ObjectMapper mapper = new ObjectMapper();
-    SimpleModule testModule = new SimpleModule("MyModule")
-    .addDeserializer(Calendar.class, new CalendarDeserializer());
+    SimpleModule testModule =
+        new SimpleModule("MyModule").addDeserializer(Calendar.class, new CalendarDeserializer());
     mapper.registerModule(testModule);
-
 
     String epoch = "\"1969-12-31T16:00:00.000000-0800\"";
 

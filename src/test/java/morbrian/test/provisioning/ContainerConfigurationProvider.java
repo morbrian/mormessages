@@ -76,6 +76,10 @@ public class ContainerConfigurationProvider {
     return vendorSpecificProvisioner;
   }
 
+  public PasswordAuthentication getPasswordAuthentication() {
+    return new PasswordAuthentication(this.getUsername(), this.getPassword().toCharArray());
+  }
+
   public enum Vendor {
     WILDFLY("wildfly"), TOMEE("tomee");
     private final String value;
@@ -83,11 +87,6 @@ public class ContainerConfigurationProvider {
     Vendor(String value) {
       this.value = value;
     }
-  }
-
-  public PasswordAuthentication getPasswordAuthentication() {
-    return new PasswordAuthentication(this.getUsername(),
-        this.getPassword().toCharArray());
   }
 
 

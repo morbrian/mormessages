@@ -6,7 +6,6 @@ import morbrian.mormessages.model.Credentials;
 import morbrian.mormessages.model.ForumEntity;
 import morbrian.mormessages.model.ForumEntityTest;
 import morbrian.mormessages.model.MessageEntity;
-import morbrian.mormessages.model.MessageEntityTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,6 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,26 +39,29 @@ public class MorMessagesRestCli {
     // referencing a keystore containing the server public cert
     // -Djavax.net.ssl.trustStore=src/test/certs/mormessages-trust.jks
     URL url = new URL("https://mormessages.morbrian.com:8443/mormessages");
-    PasswordAuthentication credentials = new PasswordAuthentication("sampleuser", "changeme".toCharArray());
+    PasswordAuthentication credentials =
+        new PasswordAuthentication("marley", "changeme".toCharArray());
     MorMessagesRestCli app = null;
 
     try {
       app = new MorMessagesRestCli(url, credentials);
-    } catch(Exception e) {
+    } catch (Exception e) {
       System.err.println("Failed to run app: " + e.getMessage());
-      System.err.println("If you are running this from maven or your IDE, remember to enable the 'cli-app-cxf' profile.");
+      System.err.println(
+          "If you are running this from maven or your IDE, remember to enable the 'cli-app-cxf' profile.");
       System.exit(1);
     }
 
     app.authenticate();
 
-    for (int fIdx = 0; fIdx < 100; ++fIdx) {
-      ForumEntity forum = app.createNewForum(ForumEntityTest.createRandomNewForum());
-
-      for (int mIdx = 0; mIdx < 10; ++mIdx) {
-        app.createNewMessage(MessageEntityTest.createRandomNewMessage(forum.getUuid()));
-      }
-    }
+    ForumEntity forum = app.createNewForum(ForumEntityTest.createRandomNewForum());
+    //    for (int fIdx = 0; fIdx < 100; ++fIdx) {
+    //      ForumEntity forum = app.createNewForum(ForumEntityTest.createRandomNewForum());
+    //
+    //      for (int mIdx = 0; mIdx < 10; ++mIdx) {
+    //        app.createNewMessage(MessageEntityTest.createRandomNewMessage(forum.getUuid()));
+    //      }
+    //    }
 
   }
 
