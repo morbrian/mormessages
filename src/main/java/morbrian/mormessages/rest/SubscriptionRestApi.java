@@ -62,6 +62,7 @@ import java.util.List;
     Subscription created = subscriptionManager.createSubscription(topicId, userIdentity);
     response.setStatus(HttpServletResponse.SC_CREATED);
     response.flushBuffer();
+    logger.info("(create-subscription) user(" + userIdentity + ") on topic (" + topicId + ")");
     return created;
   }
 

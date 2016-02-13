@@ -24,7 +24,9 @@ import java.util.List;
               + ") to count(" + sessions.size() + ") subscribers");
     }
     for (Session s : sessions) {
-      s.getAsyncRemote().sendObject(message);
+      if (s.isOpen()) {
+        s.getAsyncRemote().sendObject(message);
+      }
     }
   }
 

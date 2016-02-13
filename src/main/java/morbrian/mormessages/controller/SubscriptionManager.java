@@ -42,6 +42,9 @@ import java.util.stream.Collectors;
 
   public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
       throws SubscriptionNotFoundException {
+    Subscription subscription = idToSubscription.get(activator.getSubscriptionId());
+    logger.info("(activate-subscription) user(" + subscription.getUserIdentity() + ")"
+        + ", topicId(" + subscription.getTopicId() + ")");
     purgeStaleSubscriptions();
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
@@ -61,7 +64,11 @@ import java.util.stream.Collectors;
     if (sessionSet == null) {
       return Collections.emptyList();
     } else {
-      return new ArrayList<>(sessionSet);
+      // TODO: the filter work should be done elsewhere to make sending messages faster
+      // TODO: for now, this is fine
+      sessionSet.stream().filter(s -> !s.isOpen()).map(s -> sessionToSubscription.get(s.getId()))
+          .forEach(sub -> deleteSubscription(sub.getSubscriptionId()));
+      return new ArrayList<>(topicToSession.get(topicId));
     }
   }
 
