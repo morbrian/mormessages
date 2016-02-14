@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
       Collections.synchronizedMap(new HashMap<>());
   private Map<String, Session> subscriptionToSession = Collections.synchronizedMap(new HashMap<>());
 
-  public void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
+  public synchronized void onOpenedSubscription(@Observes @Opened final SubscriptionActivator activator)
       throws SubscriptionNotFoundException {
     Subscription subscription = idToSubscription.get(activator.getSubscriptionId());
     logger.info("(activate-subscription) user(" + subscription.getUserIdentity() + ")"
@@ -49,12 +49,12 @@ import java.util.stream.Collectors;
     activateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
 
-  public void onClosedSubscription(@Observes @Closed final SubscriptionActivator activator) {
+  public synchronized void onClosedSubscription(@Observes @Closed final SubscriptionActivator activator) {
     purgeStaleSubscriptions();
     deactivateSubscription(activator.getSession(), activator.getSubscriptionId());
   }
 
-  public void purgeStaleSubscriptions() {
+  public synchronized void purgeStaleSubscriptions() {
     idToSubscription.values().stream().filter(Subscription::isExpired)
         .map(Subscription::getSubscriptionId).forEach(this::deleteSubscription);
   }
@@ -177,7 +177,7 @@ import java.util.stream.Collectors;
     }
   }
 
-  public List<Subscription> listSubscriptions(String username) {
+  public synchronized List<Subscription> listSubscriptions(String username) {
     Set<Subscription> subscriptions = userToSubscription.get(username);
     if (subscriptions != null) {
       return new ArrayList<>(subscriptions);
@@ -186,7 +186,7 @@ import java.util.stream.Collectors;
     }
   }
 
-  public Subscription getSubscription(String subscriptionId) {
+  public synchronized Subscription getSubscription(String subscriptionId) {
     Subscription subscription = idToSubscription.get(subscriptionId);
     String username = (principal != null) ? principal.getName() : null;
     if (subscription == null) {
@@ -200,26 +200,26 @@ import java.util.stream.Collectors;
     }
   }
 
-  public int getSubscriptionCount() {
+  public synchronized int getSubscriptionCount() {
     return idToSubscription.size();
   }
 
-  public int getSubscriptionCountForTopic(String topicId) {
+  public synchronized int getSubscriptionCountForTopic(String topicId) {
     Set<Subscription> subscriptions = topicToSubscription.get(topicId);
     return (subscriptions != null) ? subscriptions.size() : 0;
   }
 
-  public int getSubscriptionCountForUsername(String username) {
+  public synchronized int getSubscriptionCountForUsername(String username) {
     Set<Subscription> subscriptions = userToSubscription.get(username);
     return (subscriptions != null) ? subscriptions.size() : 0;
   }
 
-  public int getActiveSubscriptionCount() {
+  public synchronized int getActiveSubscriptionCount() {
     assert (subscriptionToSession.size() == sessionToSubscription.size());
     return subscriptionToSession.size();
   }
 
-  public int getActiveSubscriptionCountForTopic(String topicId) {
+  public synchronized int getActiveSubscriptionCountForTopic(String topicId) {
     Set<Session> sessions = topicToSession.get(topicId);
     return (sessions != null) ? sessions.size() : 0;
   }
