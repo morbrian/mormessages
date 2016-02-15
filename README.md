@@ -1,4 +1,12 @@
-# MorMessages - JEE based sandbox for Websockets experimentation
+# MorMessages
+
+## Overview
+
+Simple forum/messaging webservice.
+
+## Status
+
+[![Build Status](https://travis-ci.org/morbrian/mormessages.svg?branch=master)](https://travis-ci.org/morbrian/mormessages)
 
 ## Getting Started
 
