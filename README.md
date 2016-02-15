@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Assumes JEE7 container, tested on Wildfly.
+Assumes JEE7 container, tested on Wildfly 9 and 10.
 
 1. Build runs arquillian tests by default.
         
@@ -16,3 +16,10 @@ Assumes JEE7 container, tested on Wildfly.
 
         http://localhost:8080/mormessages/api/rest/forum
 
+1. Subscription API
+
+        http://localhost:8080/mormessages/api/rest/subscription
+        
+1. Websocket API
+
+        http://localhost:8080/mormessages/api/websocket
